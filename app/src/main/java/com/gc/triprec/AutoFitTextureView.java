@@ -20,14 +20,35 @@ public class AutoFitTextureView extends TextureView {
         super(context, attrs, defStyleAttr);
     }
 
-    public AutoFitTextureView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
+    public void setAspectRatio(int width, int height) {
+
+        if ((0 > width) || (0 > height))
+            throw new IllegalArgumentException("size cannot be negative!");
+
+        if ((m_ratioW == width) && (m_ratioH == height))
+            return;
+
+        m_ratioW = width;
+        m_ratioH = height;
+
+        requestLayout();
     }
 
-    public void setAspectRatio(int width, int height)
-    {
-        m_ratioW = width;
-        m_ratioW = height;
-        requestLayout();
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        int width   = MeasureSpec.getSize(widthMeasureSpec);
+        int height  = MeasureSpec.getSize(heightMeasureSpec);
+
+        if ((0 == m_ratioW) || (0 == m_ratioH)) {
+            setMeasuredDimension(width, height);
+        } else {
+            if (width < height * m_ratioW / m_ratioH) {
+                setMeasuredDimension(width, width * m_ratioH / m_ratioW);
+            } else {
+                setMeasuredDimension(height * m_ratioW / m_ratioH, width);
+            }
+        }
     }
 }
