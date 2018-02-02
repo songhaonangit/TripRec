@@ -24,7 +24,7 @@ public class TripPreviewActivity extends AppCompatActivity implements ServiceCon
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_trip_preview);
         Log.i(TAG, "onCreate");
         if (null == savedInstanceState) {
             Log.i(TAG, "onCreate 1");

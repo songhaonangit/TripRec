@@ -274,9 +274,9 @@ public class TripPreviewFragment extends Fragment {
         Log.i(TAG, "configureTransform previewSize: " + String.valueOf(previewSize));
 
         if (swappedDimensions) {
-            m_textureView.setAspectRatio(previewSize.getWidth(), previewSize.getHeight());
-        } else {
             m_textureView.setAspectRatio(previewSize.getHeight(), previewSize.getWidth());
+        } else {
+            m_textureView.setAspectRatio(previewSize.getWidth(), previewSize.getHeight());
         }
 
         int rotation = m_camera.deviceToSensorRotation(deviceRotation);
