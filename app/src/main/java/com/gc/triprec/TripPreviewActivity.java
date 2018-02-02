@@ -26,12 +26,6 @@ public class TripPreviewActivity extends AppCompatActivity implements ServiceCon
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_trip_preview);
         Log.i(TAG, "onCreate");
-        if (null == savedInstanceState) {
-            Log.i(TAG, "onCreate 1");
-//            getFragmentManager().beginTransaction()
-//                    .replace(R.id.container, TripPreviewFragment.newInstance())
-//                    .commit();
-        }
     }
 
     @Override
