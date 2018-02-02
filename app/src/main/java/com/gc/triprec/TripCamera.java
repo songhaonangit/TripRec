@@ -120,20 +120,23 @@ public class TripCamera {
                 m_cameraDevice = camera;
                 Log.i(TAG, "onOpened 1 ==============");
                 //Todo: Start the preview session if the TextureView has been set up already.
-                if ((null != m_previewSize)) {
+                if ((null != m_previewSize) && (null != m_callback)) {
                     Log.i(TAG, "m_previewSize: " + String.valueOf(m_previewSize));
+                    m_callback.onStateOpened();
                 }
             }
         }
 
         @Override
         public void onDisconnected(@NonNull CameraDevice camera) {
-
+            if (null != m_callback)
+                m_callback.onStateDisconnected();
         }
 
         @Override
         public void onError(@NonNull CameraDevice camera, int error) {
-
+            if (null != m_callback)
+                m_callback.onStateError();
         }
     };
 
@@ -255,7 +258,9 @@ public class TripCamera {
 
     private TripCameraCallback m_callback;
     public interface TripCameraCallback {
-        void requestPermissions();
+        void onStateOpened();
+        void onStateDisconnected();
+        void onStateError();
     }
 
     @SuppressLint("MissingPermission")

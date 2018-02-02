@@ -192,7 +192,29 @@ public class TripPreviewFragment extends Fragment {
 
     private TripCamera.TripCameraCallback m_callback = new TripCamera.TripCameraCallback() {
         @Override
-        public void requestPermissions() {
+        public void onStateOpened() {
+            if (m_textureView.isAvailable() && (null != m_camera)) {
+
+                SurfaceTexture texture = m_textureView.getSurfaceTexture();
+                // We configure the size of default buffer to be the size of camera preview we want.
+                texture.setDefaultBufferSize(m_camera.getPreviewSize().getWidth(), m_camera.getPreviewSize().getHeight());
+
+                // This is the output Surface we need to start preview.
+                Surface surface = new Surface(texture);
+                Log.i(TAG,"onStateOpened 0");
+                m_camera.preview(surface);
+                Log.i(TAG,"onStateOpened 1");
+            }
+        }
+
+        @Override
+        public void onStateDisconnected() {
+
+        }
+
+        @Override
+        public void onStateError() {
+
         }
     };
 
