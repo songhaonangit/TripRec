@@ -88,6 +88,7 @@ public class TripPreviewFragment extends Fragment {
                 if (m_textureView != null && m_textureView.isAvailable()) {
                     Log.i(TAG, "onOrientationChanged " + String.valueOf(orientation));
                     /* Todo configure transform */
+                    configureTransform(m_textureView.getWidth(), m_textureView.getHeight());
                 }
             }
         };
@@ -125,6 +126,7 @@ public class TripPreviewFragment extends Fragment {
 
         if (m_textureView.isAvailable()) {
             /* Todo config transform */
+            configureTransform(m_textureView.getWidth(), m_textureView.getHeight());
             Log.i(TAG, "onResume m_textureView.isAvailable()");
         } else {
             Log.i(TAG, "onResume m_textureView. not isAvailable()");
