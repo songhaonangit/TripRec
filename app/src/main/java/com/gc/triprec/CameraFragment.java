@@ -95,15 +95,14 @@ public class CameraFragment extends Fragment {
     private static final int STATE_WAITING_FOR_3A_CONVERGENCE = 3;
 
     /**
-     * Tolerance when comparing aspect ratios.
-     */
-    private static final double ASPECT_RATIO_TOLERANCE = 0.005;
-
-
-    /**
      * The state of the camera device.
      */
     private int m_state = STATE_CLOSED;
+
+    /**
+     * Tolerance when comparing aspect ratios.
+     */
+    private static final double ASPECT_RATIO_TOLERANCE = 0.005;
 
     /**
      * Request code for camera permissions.
@@ -350,7 +349,7 @@ public class CameraFragment extends Fragment {
             Log.e(TAG, "no permission");
             return;
         }
-
+        Log.i(TAG, "openCamera 1");
         Activity activity = getActivity();
         CameraManager manager = (CameraManager) activity.getSystemService(Context.CAMERA_SERVICE);
 
@@ -413,7 +412,7 @@ public class CameraFragment extends Fragment {
         }
     }
 
-    private boolean setUpCameraOutputs() {
+    public boolean setUpCameraOutputs() {
         Activity activity = getActivity();
         CameraManager manager = (CameraManager) activity.getSystemService(Context.CAMERA_SERVICE);
         if (manager == null) {
