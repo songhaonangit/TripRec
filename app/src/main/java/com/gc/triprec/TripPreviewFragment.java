@@ -27,6 +27,7 @@ import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -34,7 +35,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRequestPermissionsResultCallback {
+public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRequestPermissionsResultCallback , View.OnClickListener{
+
+    private Button m_btnPhoto;
+
+    private Button m_btnVideo;
 
     private AutoFitTextureView m_textureView;
 
@@ -83,7 +88,11 @@ public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRe
     public void onViewCreated(final View view, Bundle savedInstanceState) {
         Log.i(TAG, "onViewCreated");
         m_textureView = view.findViewById(R.id.autofit_view);
-
+        m_btnPhoto = view.findViewById(R.id.picture);
+        m_btnPhoto.setOnClickListener(this);
+        m_btnVideo = view.findViewById(R.id.video);
+        m_btnVideo.setOnClickListener(this);
+        view.findViewById(R.id.info).setOnClickListener(this);
         // Setup a new OrientationEventListener.  This is used to handle rotation events like a
         // 180 degree rotation that do not normally trigger a call to onCreate to do view re-layout
         // or otherwise cause the preview TextureView's size to change.
@@ -370,6 +379,33 @@ public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRe
         double aAspect = a.getWidth() / (double) a.getHeight();
         double bAspect = b.getWidth() / (double) b.getHeight();
         return Math.abs(aAspect - bAspect) <= ASPECT_RATIO_TOLERANCE;
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.picture:
+
+                break;
+
+            case R.id.video:
+
+                break;
+
+            case R.id.info:
+                Activity activity = getActivity();
+                if (null != activity) {
+                    new AlertDialog.Builder(activity)
+                            .setMessage(R.string.intro_message)
+                            .setPositiveButton(android.R.string.ok, null)
+                            .show();
+                }
+                break;
+
+            default:
+
+                break;
+        }
     }
 
     public static class PermissionConfirmationDialog extends DialogFragment {

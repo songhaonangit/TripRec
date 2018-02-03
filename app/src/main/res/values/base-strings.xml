@@ -21,9 +21,8 @@
         <![CDATA[
 
 
-            This sample demonstrates how to use the Camera2 API to capture RAW
-            camera buffers and save them as DNG files.
-
+        The TripRec is a high resolution, real time color video camera that mounts on your visor or handlebars,
+        and can record your trip from start to finish.
 
         ]]>
     </string>
