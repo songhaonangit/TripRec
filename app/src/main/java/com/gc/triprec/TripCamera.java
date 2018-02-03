@@ -14,6 +14,7 @@ import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.ImageReader;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
@@ -72,6 +73,12 @@ public class TripCamera {
      * Camera state: Waiting for 3A convergence before capturing a photo.
      */
     private static final int STATE_WAITING_FOR_3A_CONVERGENCE = 3;
+
+
+    /**
+     * Camera state: Waiting for 3A convergence before capturing a photo.
+     */
+    private static final int STATE_RECORDING = 4;
 
     /**
      * The state of the camera device.
@@ -499,10 +506,14 @@ public class TripCamera {
     }
 
     public boolean isClosed() {
-        return STATE_CLOSED != m_state ? false : true;
+        return STATE_CLOSED == m_state;
     }
 
-    public void startRecordingVideo() {
+    public boolean isRecording() {
+        return STATE_RECORDING == m_state;
+    }
+
+    public void startRecordingVideo(Surface surface, File dir) {
 
     }
 
@@ -510,7 +521,7 @@ public class TripCamera {
 
     }
 
-    private String getVideoFilePath(Context context) {
+    public String getVideoFilePath(Context context) {
         final File dir = context.getExternalFilesDir(null);
         return (dir == null ? "" : (dir.getAbsolutePath() + "/"))
                 + System.currentTimeMillis() + ".mp4";

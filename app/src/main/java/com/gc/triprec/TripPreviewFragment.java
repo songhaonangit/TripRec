@@ -393,6 +393,8 @@ public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRe
                 break;
 
             case R.id.info:
+                Log.i(TAG, "========= path: " + m_camera.getVideoFilePath(getActivity()));
+
                 Activity activity = getActivity();
                 if (null != activity) {
                     new AlertDialog.Builder(activity)
