@@ -16,6 +16,7 @@ import android.graphics.SurfaceTexture;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 
+import android.support.annotation.NonNull;
 import android.support.v13.app.FragmentCompat;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
@@ -33,7 +34,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class TripPreviewFragment extends Fragment {
+public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRequestPermissionsResultCallback {
 
     private AutoFitTextureView m_textureView;
 
@@ -51,11 +52,15 @@ public class TripPreviewFragment extends Fragment {
      */
     private static final int REQUEST_CAMERA_PERMISSIONS = 1;
 
+
+    private static final String FRAGMENT_DIALOG = "dialog";
+
     /**
      * Permissions required to take a picture.
      */
     private static final String[] CAMERA_PERMISSIONS = {
             Manifest.permission.CAMERA,
+            Manifest.permission.RECORD_AUDIO,
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
     };
@@ -258,6 +263,27 @@ public class TripPreviewFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        Log.d(TAG, "onRequestPermissionsResult");
+        if (requestCode == REQUEST_CAMERA_PERMISSIONS) {
+            if (grantResults.length == CAMERA_PERMISSIONS.length) {
+                for (int result : grantResults) {
+                    if (result != PackageManager.PERMISSION_GRANTED) {
+                        ErrorDialog.newInstance(getString(R.string.permission_request))
+                                .show(getChildFragmentManager(), FRAGMENT_DIALOG);
+                        break;
+                    }
+                }
+            } else {
+                ErrorDialog.newInstance(getString(R.string.permission_request))
+                        .show(getChildFragmentManager(), FRAGMENT_DIALOG);
+            }
+        } else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+
     private void configureTransform(int viewWidth, int viewHeight) {
         Activity activity = getActivity();
         Log.i(TAG, "configureTransform w: " + String.valueOf(viewWidth) + " h: " + String.valueOf(viewHeight));
@@ -370,5 +396,33 @@ public class TripPreviewFragment extends Fragment {
                         }
                     }).create();
         }
+    }
+
+    public static class ErrorDialog extends DialogFragment {
+
+        private static final String ARG_MESSAGE = "message";
+
+        public static ErrorDialog newInstance(String message) {
+            ErrorDialog dialog = new ErrorDialog();
+            Bundle args = new Bundle();
+            args.putString(ARG_MESSAGE, message);
+            dialog.setArguments(args);
+            return dialog;
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            final Activity activity = getActivity();
+            return new AlertDialog.Builder(activity)
+                    .setMessage(getArguments().getString(ARG_MESSAGE))
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            activity.finish();
+                        }
+                    })
+                    .create();
+        }
+
     }
 }
