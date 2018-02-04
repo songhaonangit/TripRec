@@ -14,6 +14,7 @@ import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.ImageReader;
+import android.media.MediaRecorder;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -100,6 +101,8 @@ public class TripCamera {
     private String m_cameraId;
 
     private Size m_previewSize;
+
+    private MediaRecorder m_mediaRecorder;
 
     /**
      * A lock protecting camera state.
@@ -513,12 +516,49 @@ public class TripCamera {
         return STATE_RECORDING == m_state;
     }
 
-    public void startRecordingVideo(Surface surface, File dir) {
+    public void startRecordingVideo(@NonNull Surface surface, @NonNull File dir) {
+        if (null == m_cameraDevice)
+            return;
+
+        try {
+            /* Todo: setup media recorder */
+
+
+            m_previewRequestBuilder = m_cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
+            List<Surface> surfaces = new ArrayList<>();
+            surfaces.add(surface);
+            m_previewRequestBuilder.addTarget(surface);
+
+            Surface recorderSurface = m_mediaRecorder.getSurface();
+            surfaces.add(recorderSurface);
+            m_previewRequestBuilder.addTarget(recorderSurface);
+
+            m_cameraDevice.createCaptureSession(surfaces, new CameraCaptureSession.StateCallback() {
+                @Override
+                public void onConfigured(@NonNull CameraCaptureSession session) {
+                    m_state = STATE_RECORDING;
+                }
+
+                @Override
+                public void onConfigureFailed(@NonNull CameraCaptureSession session) {
+
+                }
+            }, m_backgroundHandler);
+
+        } catch (CameraAccessException e) {
+            e.printStackTrace();
+        }
+
 
     }
 
     public void stopRecordingVideo() {
+        /* Todo recording state change */
 
+        m_mediaRecorder.stop();
+        m_mediaRecorder.reset();
+
+        /* start preview */
     }
 
     public String getVideoFilePath(Context context) {
