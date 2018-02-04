@@ -9,6 +9,7 @@ import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
+import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
@@ -44,6 +45,19 @@ public class TripCamera {
         ORIENTATIONS.append(Surface.ROTATION_180, 180);
         ORIENTATIONS.append(Surface.ROTATION_270, 270);
     }
+
+    private static final int SENSOR_ORIENTATION_DEFAULT_DEGREES = 90;
+
+    private static final int SENSOR_ORIENTATION_INVERSE_DEGREES = 270;
+
+    private static final SparseIntArray INVERSE_ORIENTATIONS = new SparseIntArray();
+    static {
+        INVERSE_ORIENTATIONS.append(Surface.ROTATION_0, 270);
+        INVERSE_ORIENTATIONS.append(Surface.ROTATION_90, 180);
+        INVERSE_ORIENTATIONS.append(Surface.ROTATION_180, 90);
+        INVERSE_ORIENTATIONS.append(Surface.ROTATION_270, 0);
+    }
+
 
     /**
      * Max preview width that is guaranteed by Camera2 API
@@ -85,6 +99,8 @@ public class TripCamera {
      * The state of the camera device.
      */
     private int m_state = STATE_CLOSED;
+
+    private Integer m_sensorOrientation;
 
     private CameraManager m_manager;
 
@@ -202,6 +218,7 @@ public class TripCamera {
         }
 
         Log.i(TAG, "open");
+        m_mediaRecorder = new MediaRecorder();
 
         startBackgroundThread();
 
@@ -216,6 +233,10 @@ public class TripCamera {
     public void close() {
         Log.i(TAG, "close");
         closeCamera();
+        if (null != m_mediaRecorder) {
+            m_mediaRecorder.release();
+            m_mediaRecorder = null;
+        }
         stopBackgroundThread();
     }
 
@@ -267,6 +288,26 @@ public class TripCamera {
 
     }
 
+    private void setUpCaptureRequestBuilder(CaptureRequest.Builder builder) {
+        builder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
+    }
+
+    /**
+     * Update the camera preview. {@link #preview(Surface)} needs to be called in advance.
+     */
+    private void updatePreview() {
+        if (null == m_cameraDevice) {
+            return;
+        }
+        try {
+            setUpCaptureRequestBuilder(m_previewRequestBuilder);
+            HandlerThread thread = new HandlerThread("CameraPreview");
+            thread.start();
+            m_cameraCaptureSession.setRepeatingRequest(m_previewRequestBuilder.build(), null, m_backgroundHandler);
+        } catch (CameraAccessException e) {
+            e.printStackTrace();
+        }
+    }
 
     private TripCameraCallback m_callback;
     public interface TripCameraCallback {
@@ -508,6 +549,15 @@ public class TripCamera {
         Log.i(TAG, "2 m_previewSize: " + String.valueOf(m_previewSize));
     }
 
+
+    private void closePreviewSession() {
+        if (m_cameraCaptureSession != null) {
+            m_cameraCaptureSession.close();
+            m_cameraCaptureSession = null;
+        }
+    }
+
+
     public boolean isClosed() {
         return STATE_CLOSED == m_state;
     }
@@ -516,13 +566,15 @@ public class TripCamera {
         return STATE_RECORDING == m_state;
     }
 
-    public void startRecordingVideo(@NonNull Surface surface, @NonNull File dir) {
+    public void startRecordingVideo(@NonNull Surface surface, @NonNull String dir, int rotation) {
         if (null == m_cameraDevice)
             return;
 
+        closePreviewSession();
+
         try {
             /* Todo: setup media recorder */
-
+            setUpMediaRecorder(dir, rotation);
 
             m_previewRequestBuilder = m_cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
             List<Surface> surfaces = new ArrayList<>();
@@ -536,7 +588,10 @@ public class TripCamera {
             m_cameraDevice.createCaptureSession(surfaces, new CameraCaptureSession.StateCallback() {
                 @Override
                 public void onConfigured(@NonNull CameraCaptureSession session) {
+                    m_cameraCaptureSession = session;
                     m_state = STATE_RECORDING;
+                    updatePreview();
+                    m_mediaRecorder.start();
                 }
 
                 @Override
@@ -545,7 +600,7 @@ public class TripCamera {
                 }
             }, m_backgroundHandler);
 
-        } catch (CameraAccessException e) {
+        } catch (CameraAccessException | IOException e) {
             e.printStackTrace();
         }
 
@@ -554,20 +609,36 @@ public class TripCamera {
 
     public void stopRecordingVideo() {
         /* Todo recording state change */
-
+        m_state = STATE_PREVIEW;
         m_mediaRecorder.stop();
         m_mediaRecorder.reset();
 
         /* start preview */
     }
 
-    public String getVideoFilePath(Context context) {
-        final File dir = context.getExternalFilesDir(null);
-        return (dir == null ? "" : (dir.getAbsolutePath() + "/"))
-                + System.currentTimeMillis() + ".mp4";
-    }
+    private void setUpMediaRecorder(String filePath, int rotation) throws IOException {
+        m_mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        m_mediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
+        m_mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
 
-    private void setUpMediaRecorder() throws IOException {
+        m_mediaRecorder.setOutputFile(filePath);
+        m_mediaRecorder.setVideoEncodingBitRate(10000000);
+        m_mediaRecorder.setVideoFrameRate(30);
+        m_mediaRecorder.setVideoSize(m_previewSize.getWidth(), m_previewSize.getHeight());
+        m_mediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+        m_mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+
+        m_sensorOrientation = m_cameraCharacteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
+
+        switch (m_sensorOrientation) {
+            case SENSOR_ORIENTATION_DEFAULT_DEGREES:
+                m_mediaRecorder.setOrientationHint(ORIENTATIONS.get(rotation));
+                break;
+            case SENSOR_ORIENTATION_INVERSE_DEGREES:
+                m_mediaRecorder.setOrientationHint(INVERSE_ORIENTATIONS.get(rotation));
+                break;
+        }
+        m_mediaRecorder.prepare();
 
     }
 

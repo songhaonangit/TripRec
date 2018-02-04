@@ -16,6 +16,8 @@ import android.graphics.SurfaceTexture;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v13.app.FragmentCompat;
 import android.support.v4.app.ActivityCompat;
@@ -29,6 +31,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,6 +49,8 @@ public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRe
     private OrientationEventListener m_orientationListener;
 
     private TripCamera m_camera;
+
+    private String m_nextVideoAbsolutePath = null;
 
     /**
      * Tolerance when comparing aspect ratios.
@@ -381,6 +386,62 @@ public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRe
         return Math.abs(aAspect - bAspect) <= ASPECT_RATIO_TOLERANCE;
     }
 
+
+    public String getVideoFilePath(Context context) {
+        final File dir = context.getExternalFilesDir(null);
+        return (dir == null ? "" : (dir.getAbsolutePath() + "/"))
+                + System.currentTimeMillis() + ".mp4";
+    }
+
+    private static final int MsgRecordStart = 1;
+    private static final int MsgRecordStop = 2;
+    private PreviewHandler m_handler = new PreviewHandler(this);
+    private static class PreviewHandler extends Handler {
+        private final WeakReference<TripPreviewFragment> m_fragment;
+
+        PreviewHandler(TripPreviewFragment fragment) {
+            m_fragment = new WeakReference<>(fragment);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            TripPreviewFragment fragment = m_fragment.get();
+            if (null == fragment.m_camera)
+                return;
+            SurfaceTexture texture = fragment.m_textureView.getSurfaceTexture();
+            assert texture != null;
+            texture.setDefaultBufferSize(fragment.m_camera.getPreviewSize().getWidth(), fragment.m_camera.getPreviewSize().getHeight());
+
+            switch (msg.what) {
+                case MsgRecordStart:
+                    Activity activity = fragment.getActivity();
+                    if (null == activity)
+                        return;
+                    fragment.m_nextVideoAbsolutePath = fragment.getVideoFilePath(activity);
+                    Log.d(TAG, "start recording Video saved: " + fragment.m_nextVideoAbsolutePath);
+
+                    int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
+                    fragment.m_camera.startRecordingVideo(new Surface(texture), fragment.m_nextVideoAbsolutePath, rotation);
+
+                    break;
+
+                case MsgRecordStop:
+                    if (fragment.m_camera.isRecording()) {
+                        Log.i(TAG, "stop recording");
+                        fragment.m_camera.stopRecordingVideo();
+                        fragment.m_nextVideoAbsolutePath = null;
+                        fragment.m_camera.preview(new Surface(texture));
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+    }
+
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -389,12 +450,14 @@ public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRe
                 break;
 
             case R.id.video:
-
+                if (m_camera.isRecording()) {
+                    m_handler.sendEmptyMessage(MsgRecordStop);
+                } else {
+                    m_handler.sendEmptyMessage(MsgRecordStart);
+                }
                 break;
 
             case R.id.info:
-                Log.i(TAG, "========= path: " + m_camera.getVideoFilePath(getActivity()));
-
                 Activity activity = getActivity();
                 if (null != activity) {
                     new AlertDialog.Builder(activity)
@@ -461,6 +524,6 @@ public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRe
                     })
                     .create();
         }
-
     }
+
 }
