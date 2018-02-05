@@ -3,6 +3,7 @@ package com.gc.triprec;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 public class TripRecSettings {
     private SharedPreferences m_settings;
@@ -30,17 +31,9 @@ public class TripRecSettings {
     }
 
     public int getRecordTime() {
-        String time = m_settings.getString(Constants.SettingConstants.KEY_RECORD_TIME, "60");
-        int recordtime;
-        if (time.equals("60")) {
-            recordtime = 60;
-        } else if (time.equals("120")) {
-            recordtime = 120;
-        } else if (time.equals("180")) {
-            recordtime = 180;
-        } else {
-            recordtime = 60;
-        }
+        String time = m_settings.getString(Constants.SettingConstants.KEY_RECORD_TIME, "15");
+        int recordtime = Integer.parseInt(time);
+        Log.i(TAG, "get recordtime: " + String.valueOf(recordtime));
 
         return recordtime;
     }

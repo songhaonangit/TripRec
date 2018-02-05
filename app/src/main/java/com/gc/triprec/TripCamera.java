@@ -200,7 +200,7 @@ public class TripCamera {
         @Override
         public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
             super.onCaptureCompleted(session, request, result);
-            Log.i(TAG, "onCaptureCompleted");
+//            Log.i(TAG, "onCaptureCompleted");
             process(result);
         }
     };

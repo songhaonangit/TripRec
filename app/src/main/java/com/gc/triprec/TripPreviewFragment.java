@@ -34,6 +34,8 @@ import android.widget.Button;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRequestPermissionsResultCallback , View.OnClickListener{
 
@@ -50,6 +52,8 @@ public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRe
     private TripCamera m_camera;
 
     private TripRecSettings m_settings;
+
+    private boolean isRecording = false;
 
     private String m_nextVideoAbsolutePath = null;
 
@@ -110,7 +114,7 @@ public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRe
                 if (m_textureView != null && m_textureView.isAvailable()) {
                     Log.i(TAG, "onOrientationChanged " + String.valueOf(orientation));
                     /* Todo configure transform */
-                    configureTransform(m_textureView.getWidth(), m_textureView.getHeight());
+//                    configureTransform(m_textureView.getWidth(), m_textureView.getHeight());
                 }
             }
         };
@@ -226,6 +230,7 @@ public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRe
                 Surface surface = new Surface(texture);
                 Log.i(TAG,"onStateOpened 0");
                 m_camera.preview(surface);
+
                 Log.i(TAG,"onStateOpened 1");
             }
         }
@@ -435,8 +440,10 @@ public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRe
                     if (fragment.m_camera.isRecording()) {
                         Log.i(TAG, "stop recording");
                         fragment.m_camera.stopRecordingVideo();
+                        Log.i(TAG, "stop recording 1");
                         fragment.m_nextVideoAbsolutePath = null;
                         fragment.m_camera.preview(new Surface(texture));
+                        Log.i(TAG, "stop recording 2");
                     }
                     break;
 
@@ -453,6 +460,7 @@ public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRe
         }
 
     }
+    private final Timer m_recordTimer = new Timer();
 
     @Override
     public void onClick(View v) {
@@ -467,6 +475,17 @@ public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRe
                 } else {
                     m_handler.sendEmptyMessage(MsgRecordStart);
                 }
+//                if (null == m_settings)
+//                    return;
+//
+//                if (isRecording) {
+//                    m_recordTimer.cancel();
+//                    m_handler.sendEmptyMessage(MsgRecordStop);
+//                    isRecording = false;
+//                } else {
+//                    m_recordTimer.schedule(m_recordTask, 3 * 1000,(m_settings.getRecordTime()) * 1000);
+//                    isRecording = true;
+//                }
                 break;
 
             case R.id.info:
@@ -541,5 +560,20 @@ public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRe
                     .create();
         }
     }
+
+    private TimerTask m_recordTask = new TimerTask() {
+        @Override
+        public void run() {
+            if (null == m_camera)
+                return;
+
+            if (m_camera.isRecording()) {
+                Log.i(TAG, "recording stop ... ");
+                m_handler.sendEmptyMessage(MsgRecordStop);
+            }
+            Log.i(TAG, "recording start");
+            m_handler.sendEmptyMessage(MsgRecordStart);
+        }
+    };
 
 }

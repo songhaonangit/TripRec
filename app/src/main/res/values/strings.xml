@@ -31,7 +31,7 @@
         <item>3 min</item>
     </string-array>
     <string-array name="pref_recordtime_list_values">
-        <item>60</item>
+        <item>15</item>
         <item>120</item>
         <item>180</item>
     </string-array>
