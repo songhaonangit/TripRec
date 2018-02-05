@@ -440,7 +440,7 @@ public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRe
                 case MsgSettings:
                     fragment.m_camera.close();
                     Intent intent = new Intent();
-                    intent.setClass(fragment.getActivity().getApplicationContext(), SettingActivity.class);
+                    intent.setClass(fragment.getActivity().getApplicationContext(), SettingsActivity.class);
                     fragment.getActivity().startActivity(intent);
                     break;
 

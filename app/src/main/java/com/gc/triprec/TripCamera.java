@@ -246,8 +246,6 @@ public class TripCamera {
         } finally {
             m_cameraOpenCloseLock.release();
         }
-
-
     }
 
     public void preview(Surface surface) {
