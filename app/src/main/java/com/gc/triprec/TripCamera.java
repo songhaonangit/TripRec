@@ -232,12 +232,22 @@ public class TripCamera {
 
     public void close() {
         Log.i(TAG, "close");
-        closeCamera();
-        if (null != m_mediaRecorder) {
-            m_mediaRecorder.release();
-            m_mediaRecorder = null;
+        try {
+            m_cameraOpenCloseLock.acquire();
+            closeCamera();
+            if (null != m_mediaRecorder) {
+                m_mediaRecorder.release();
+                m_mediaRecorder = null;
+            }
+
+            stopBackgroundThread();
+        } catch (InterruptedException e) {
+            throw new RuntimeException("Interrupted while trying to lock camera closing.", e);
+        } finally {
+            m_cameraOpenCloseLock.release();
         }
-        stopBackgroundThread();
+
+
     }
 
     public void preview(Surface surface) {
@@ -321,6 +331,7 @@ public class TripCamera {
 
         //Todo: Wait for any previously running session to finish.
         try {
+            Log.d(TAG, "tryAcquire");
             if (!m_cameraOpenCloseLock.tryAcquire(2500, TimeUnit.MICROSECONDS)) {
                 throw new RuntimeException("Time out waiting to lock camera opening.");
             }
@@ -340,16 +351,22 @@ public class TripCamera {
     }
 
     private void closeCamera() {
-        try {
-            m_cameraOpenCloseLock.acquire();
+            Log.i(TAG, "closeCamera 0");
+            synchronized (m_cameraStateLock) {
+                m_state = STATE_CLOSED;
+                Log.i(TAG, "closeCamera 1");
+                if (null != m_cameraCaptureSession) {
+                    m_cameraCaptureSession.close();
+                    m_cameraCaptureSession = null;
+                    Log.i(TAG, "closeCamera 2");
+                }
 
-
-        } catch (InterruptedException e) {
-            throw new RuntimeException("Interrupted while trying to lock camera closing.", e);
-        } finally {
-            m_cameraOpenCloseLock.release();
-        }
-    }
+                if (null != m_cameraDevice) {
+                    m_cameraDevice.close();
+                    m_cameraDevice = null;
+                }
+            }
+      }
 
     private boolean setUpCameraOutputs() {
 

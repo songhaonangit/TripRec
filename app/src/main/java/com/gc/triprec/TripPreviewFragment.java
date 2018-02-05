@@ -8,6 +8,7 @@ import android.app.DialogFragment;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Matrix;
 import android.graphics.Point;
@@ -39,6 +40,8 @@ public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRe
     private Button m_btnPhoto;
 
     private Button m_btnVideo;
+
+    private Button m_btnSetting;
 
     private AutoFitTextureView m_textureView;
 
@@ -93,6 +96,8 @@ public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRe
         m_btnPhoto.setOnClickListener(this);
         m_btnVideo = view.findViewById(R.id.video);
         m_btnVideo.setOnClickListener(this);
+        m_btnSetting = view.findViewById(R.id.settings);
+        m_btnSetting.setOnClickListener(this);
         view.findViewById(R.id.info).setOnClickListener(this);
         // Setup a new OrientationEventListener.  This is used to handle rotation events like a
         // 180 degree rotation that do not normally trigger a call to onCreate to do view re-layout
@@ -141,8 +146,8 @@ public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRe
 
         if (m_textureView.isAvailable()) {
             /* Todo config transform */
-            configureTransform(m_textureView.getWidth(), m_textureView.getHeight());
             Log.i(TAG, "onResume m_textureView.isAvailable()");
+            configureTransform(m_textureView.getWidth(), m_textureView.getHeight());
         } else {
             Log.i(TAG, "onResume m_textureView. not isAvailable()");
             m_textureView.setSurfaceTextureListener(m_surfaceTextureListener);
@@ -391,6 +396,7 @@ public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRe
 
     private static final int MsgRecordStart = 1;
     private static final int MsgRecordStop = 2;
+    private static final int MsgSettings = 3;
     private PreviewHandler m_handler = new PreviewHandler(this);
     private static class PreviewHandler extends Handler {
         private final WeakReference<TripPreviewFragment> m_fragment;
@@ -431,6 +437,13 @@ public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRe
                     }
                     break;
 
+                case MsgSettings:
+                    fragment.m_camera.close();
+                    Intent intent = new Intent();
+                    intent.setClass(fragment.getActivity().getApplicationContext(), SettingActivity.class);
+                    fragment.getActivity().startActivity(intent);
+                    break;
+
                 default:
                     break;
             }
@@ -461,6 +474,10 @@ public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRe
                             .setPositiveButton(android.R.string.ok, null)
                             .show();
                 }
+                break;
+
+            case R.id.settings:
+                m_handler.sendEmptyMessage(MsgSettings);
                 break;
 
             default:
