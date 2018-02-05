@@ -9,6 +9,7 @@ import android.util.Log;
 
 public class TripRecService extends Service {
     private TripCamera m_camera = null;
+    private TripRecSettings m_settings = null;
     private static final String TAG = "TripRecService";
 
     public TripRecService() {
@@ -18,6 +19,7 @@ public class TripRecService extends Service {
     public void onCreate() {
         super.onCreate();
         Log.i(TAG, "onCreate");
+        m_settings = new TripRecSettings(this);
         if (null != m_camera) {
             return;
         }
@@ -52,5 +54,9 @@ public class TripRecService extends Service {
 
     public TripCamera getCamera() {
         return m_camera;
+    }
+
+    public TripRecSettings getSettings() {
+        return m_settings;
     }
 }
