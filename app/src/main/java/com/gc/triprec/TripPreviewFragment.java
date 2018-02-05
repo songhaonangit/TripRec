@@ -49,6 +49,8 @@ public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRe
 
     private TripCamera m_camera;
 
+    private TripRecSettings m_settings;
+
     private String m_nextVideoAbsolutePath = null;
 
     /**
@@ -120,6 +122,7 @@ public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRe
         Log.i(TAG, "onAttach");
         TripPreviewActivity parent = (TripPreviewActivity) getActivity();
         m_camera = parent.getCamera();
+        m_settings = parent.getSettings();
     }
 
     @Override

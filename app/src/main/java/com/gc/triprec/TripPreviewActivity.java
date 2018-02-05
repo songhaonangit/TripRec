@@ -91,4 +91,10 @@ public class TripPreviewActivity extends AppCompatActivity implements ServiceCon
         return m_service.getCamera();
     }
 
+    public TripRecSettings getSettings() {
+        if (null == m_service) {
+            return null;
+        }
+        return m_service.getSettings();
+    }
 }
