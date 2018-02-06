@@ -217,6 +217,18 @@ public class TripCamera {
 //            Log.i(TAG, "onCaptureCompleted");
             process(result);
         }
+
+        @Override
+        public void onCaptureSequenceCompleted(@NonNull CameraCaptureSession session, int sequenceId, long frameNumber) {
+            super.onCaptureSequenceCompleted(session, sequenceId, frameNumber);
+            Log.i(TAG, "onCaptureSequenceCompleted");
+        }
+
+        @Override
+        public void onCaptureSequenceAborted(@NonNull CameraCaptureSession session, int sequenceId) {
+            super.onCaptureSequenceAborted(session, sequenceId);
+            Log.i(TAG, "onCaptureSequenceCompleted");
+        }
     };
 
     public TripCamera(CameraManager manager) {
@@ -268,10 +280,15 @@ public class TripCamera {
                 Log.e(TAG, "surface null");
                 return;
             }
-            closePreviewSession();
+            Log.i(TAG, "preview 0");
+//            closePreviewSession();
+
             // We set up a CaptureRequest.Builder with the output Surface.
             m_previewRequestBuilder = m_cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+            Log.i(TAG, "preview 1");
+
             m_previewRequestBuilder.addTarget(surface);
+            Log.i(TAG, "preview 2");
 
             m_cameraDevice.createCaptureSession(Arrays.asList(surface), new CameraCaptureSession.StateCallback() {
                 @Override
@@ -311,25 +328,35 @@ public class TripCamera {
 
     }
 
-    private void setUpCaptureRequestBuilder(CaptureRequest.Builder builder) {
-        builder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
-    }
 
     /**
-     * Update the camera preview. {@link #preview(Surface)} needs to be called in advance.
+     * Rotation need to transform from the camera sensor orientation to the device's current
+     * orientation.
+     * @param deviceOrientation the current device orientation relative to the native device
+     *                          orientation.
+     * @return the total rotation from the sensor orientation to the current device orientation.
      */
-    private void updatePreview() {
-        if (null == m_cameraDevice) {
-            return;
+    public int sensorToDeviceRotation(int deviceOrientation) {
+        int sensorOrientation = m_cameraCharacteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
+
+        // Get device orientation in degrees
+        deviceOrientation = ORIENTATIONS.get(deviceOrientation);
+
+        // Reverse device orientation for front-facing cameras
+        if (m_cameraCharacteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT) {
+            deviceOrientation = -deviceOrientation;
         }
-        try {
-            setUpCaptureRequestBuilder(m_previewRequestBuilder);
-            HandlerThread thread = new HandlerThread("CameraPreview");
-            thread.start();
-            m_cameraCaptureSession.setRepeatingRequest(m_previewRequestBuilder.build(), null, m_backgroundHandler);
-        } catch (CameraAccessException e) {
-            e.printStackTrace();
-        }
+
+        // Calculate desired JPEG orientation relative to camera orientation to make
+        // the image upright relative to the device orientation
+        return (sensorOrientation + deviceOrientation + 360) % 360;
+    }
+
+    public int deviceToSensorRotation(int deviceRotation) {
+        return (m_cameraCharacteristics.get(CameraCharacteristics.LENS_FACING) ==
+                CameraCharacteristics.LENS_FACING_FRONT) ?
+                (360 + ORIENTATIONS.get(deviceRotation)) % 360 :
+                (360 - ORIENTATIONS.get(deviceRotation)) % 360;
     }
 
     private TripCameraCallback m_callback;
@@ -337,6 +364,8 @@ public class TripCamera {
         void onStateOpened();
         void onStateDisconnected();
         void onStateError();
+        void onStatePreviewComplete();
+        void onStateRecordComplete();
     }
 
     @SuppressLint("MissingPermission")
@@ -442,37 +471,6 @@ public class TripCamera {
 
 
     /**
-     * Rotation need to transform from the camera sensor orientation to the device's current
-     * orientation.
-     * @param deviceOrientation the current device orientation relative to the native device
-     *                          orientation.
-     * @return the total rotation from the sensor orientation to the current device orientation.
-     */
-    public int sensorToDeviceRotation(int deviceOrientation) {
-        int sensorOrientation = m_cameraCharacteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
-
-        // Get device orientation in degrees
-        deviceOrientation = ORIENTATIONS.get(deviceOrientation);
-
-        // Reverse device orientation for front-facing cameras
-        if (m_cameraCharacteristics.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT) {
-            deviceOrientation = -deviceOrientation;
-        }
-
-        // Calculate desired JPEG orientation relative to camera orientation to make
-        // the image upright relative to the device orientation
-        return (sensorOrientation + deviceOrientation + 360) % 360;
-    }
-
-    public int deviceToSensorRotation(int deviceRotation) {
-        return (m_cameraCharacteristics.get(CameraCharacteristics.LENS_FACING) ==
-                CameraCharacteristics.LENS_FACING_FRONT) ?
-                (360 + ORIENTATIONS.get(deviceRotation)) % 360 :
-                (360 - ORIENTATIONS.get(deviceRotation)) % 360;
-    }
-
-
-    /**
      * Comparator based on area of the given {@link Size} objects.
      */
     static class CompareSizesByArea implements Comparator<Size> {
@@ -484,54 +482,6 @@ public class TripCamera {
                     (long) rhs.getWidth() * rhs.getHeight());
         }
 
-    }
-
-    /**
-     * Given {@code choices} of {@code Size}s supported by a camera, choose the smallest one that
-     * is at least as large as the respective texture view size, and that is at most as large as the
-     * respective max size, and whose aspect ratio matches with the specified value. If such size
-     * doesn't exist, choose the largest one that is at most as large as the respective max size,
-     * and whose aspect ratio matches with the specified value.
-     *
-     * @param choices           The list of sizes that the camera supports for the intended output
-     *                          class
-     * @param textureViewWidth  The width of the texture view relative to sensor coordinate
-     * @param textureViewHeight The height of the texture view relative to sensor coordinate
-     * @param maxWidth          The maximum width that can be chosen
-     * @param maxHeight         The maximum height that can be chosen
-     * @param aspectRatio       The aspect ratio
-     * @return The optimal {@code Size}, or an arbitrary one if none were big enough
-     */
-    private static Size chooseOptimalSize(Size[] choices, int textureViewWidth,
-                                          int textureViewHeight, int maxWidth, int maxHeight, Size aspectRatio) {
-        // Collect the supported resolutions that are at least as big as the preview Surface
-        List<Size> bigEnough = new ArrayList<>();
-        // Collect the supported resolutions that are smaller than the preview Surface
-        List<Size> notBigEnough = new ArrayList<>();
-        int w = aspectRatio.getWidth();
-        int h = aspectRatio.getHeight();
-        for (Size option : choices) {
-            if (option.getWidth() <= maxWidth && option.getHeight() <= maxHeight &&
-                    option.getHeight() == option.getWidth() * h / w) {
-                if (option.getWidth() >= textureViewWidth &&
-                        option.getHeight() >= textureViewHeight) {
-                    bigEnough.add(option);
-                } else {
-                    notBigEnough.add(option);
-                }
-            }
-        }
-
-        // Pick the smallest of those big enough. If there is no one big enough, pick the
-        // largest of those not big enough.
-        if (bigEnough.size() > 0) {
-            return Collections.min(bigEnough, new CameraFragment.CompareSizesByArea());
-        } else if (notBigEnough.size() > 0) {
-            return Collections.max(notBigEnough, new CameraFragment.CompareSizesByArea());
-        } else {
-            Log.e(TAG, "Couldn't find any suitable preview size");
-            return choices[0];
-        }
     }
 
     public <T> Size optimalSize(Class<T> kclass, boolean swappedDimensions, int viewWidth, int viewHeight,
@@ -600,8 +550,6 @@ public class TripCamera {
         if (null == m_cameraDevice)
             return;
 
-        closePreviewSession();
-
         try {
             /* Todo: setup media recorder */
             setUpMediaRecorder(dir, rotation);
@@ -646,8 +594,92 @@ public class TripCamera {
         }
         m_mediaRecorder.stop();
         m_mediaRecorder.reset();
+        closePreviewSession();
 
         /* start preview */
+    }
+
+
+    private void setUpCaptureRequestBuilder(CaptureRequest.Builder builder) {
+        builder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
+    }
+
+    /**
+     * Update the camera preview. {@link #preview(Surface)} needs to be called in advance.
+     */
+    private void updatePreview() {
+        if (null == m_cameraDevice) {
+            return;
+        }
+        try {
+            setUpCaptureRequestBuilder(m_previewRequestBuilder);
+            HandlerThread thread = new HandlerThread("CameraPreview");
+            thread.start();
+            m_cameraCaptureSession.setRepeatingRequest(m_previewRequestBuilder.build(), new CameraCaptureSession.CaptureCallback() {
+                @Override
+                public void onCaptureSequenceCompleted(@NonNull CameraCaptureSession session, int sequenceId, long frameNumber) {
+                    super.onCaptureSequenceCompleted(session, sequenceId, frameNumber);
+                    Log.i(TAG, "updatePreview onCaptureSequenceCompleted");
+                    m_callback.onStateRecordComplete();
+                }
+
+                @Override
+                public void onCaptureSequenceAborted(@NonNull CameraCaptureSession session, int sequenceId) {
+                    super.onCaptureSequenceAborted(session, sequenceId);
+                    Log.i(TAG, "updatePreview onCaptureSequenceAborted");
+                }
+            }, m_backgroundHandler);
+        } catch (CameraAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Given {@code choices} of {@code Size}s supported by a camera, choose the smallest one that
+     * is at least as large as the respective texture view size, and that is at most as large as the
+     * respective max size, and whose aspect ratio matches with the specified value. If such size
+     * doesn't exist, choose the largest one that is at most as large as the respective max size,
+     * and whose aspect ratio matches with the specified value.
+     *
+     * @param choices           The list of sizes that the camera supports for the intended output
+     *                          class
+     * @param textureViewWidth  The width of the texture view relative to sensor coordinate
+     * @param textureViewHeight The height of the texture view relative to sensor coordinate
+     * @param maxWidth          The maximum width that can be chosen
+     * @param maxHeight         The maximum height that can be chosen
+     * @param aspectRatio       The aspect ratio
+     * @return The optimal {@code Size}, or an arbitrary one if none were big enough
+     */
+    private static Size chooseOptimalSize(Size[] choices, int textureViewWidth,
+                                          int textureViewHeight, int maxWidth, int maxHeight, Size aspectRatio) {
+        // Collect the supported resolutions that are at least as big as the preview Surface
+        List<Size> bigEnough = new ArrayList<>();
+        // Collect the supported resolutions that are smaller than the preview Surface
+        List<Size> notBigEnough = new ArrayList<>();
+        int w = aspectRatio.getWidth();
+        int h = aspectRatio.getHeight();
+        for (Size option : choices) {
+            if (option.getWidth() <= maxWidth && option.getHeight() <= maxHeight &&
+                    option.getHeight() == option.getWidth() * h / w) {
+                if (option.getWidth() >= textureViewWidth &&
+                        option.getHeight() >= textureViewHeight) {
+                    bigEnough.add(option);
+                } else {
+                    notBigEnough.add(option);
+                }
+            }
+        }
+
+        // Pick the smallest of those big enough. If there is no one big enough, pick the
+        // largest of those not big enough.
+        if (bigEnough.size() > 0) {
+            return Collections.min(bigEnough, new CameraFragment.CompareSizesByArea());
+        } else if (notBigEnough.size() > 0) {
+            return Collections.max(notBigEnough, new CameraFragment.CompareSizesByArea());
+        } else {
+            Log.e(TAG, "Couldn't find any suitable preview size");
+            return choices[0];
+        }
     }
 
     private void setUpMediaRecorder(String filePath, int rotation) throws IOException {

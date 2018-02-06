@@ -244,6 +244,28 @@ public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRe
         public void onStateError() {
 
         }
+
+        @Override
+        public void onStatePreviewComplete() {
+
+        }
+
+        @Override
+        public void onStateRecordComplete() {
+            if (m_textureView.isAvailable() && (null != m_camera)) {
+
+                SurfaceTexture texture = m_textureView.getSurfaceTexture();
+                // We configure the size of default buffer to be the size of camera preview we want.
+                texture.setDefaultBufferSize(m_camera.getPreviewSize().getWidth(), m_camera.getPreviewSize().getHeight());
+
+                // This is the output Surface we need to start preview.
+                Surface surface = new Surface(texture);
+                Log.i(TAG,"onStateRecordComplete 0");
+                m_camera.preview(surface);
+
+                Log.i(TAG,"onStateRecordComplete 1");
+            }
+        }
     };
 
     /**
@@ -442,7 +464,7 @@ public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRe
                         fragment.m_camera.stopRecordingVideo();
                         Log.i(TAG, "stop recording 1");
                         fragment.m_nextVideoAbsolutePath = null;
-                        fragment.m_camera.preview(new Surface(texture));
+//                        fragment.m_camera.preview(new Surface(texture));
                         Log.i(TAG, "stop recording 2");
                     }
                     break;
@@ -460,7 +482,45 @@ public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRe
         }
 
     }
-    private final Timer m_recordTimer = new Timer();
+    private Timer m_recordTimer = null;
+
+
+
+//    private TimerTask m_recordTask = new TimerTask() {
+//        @Override
+//        public void run() {
+//            if (null == m_camera)
+//                return;
+//
+//            if (m_camera.isRecording()) {
+//                Log.i(TAG, "recording stop ... ");
+//                m_handler.sendEmptyMessage(MsgRecordStop);
+//            }
+//            Log.i(TAG, "recording start .......");
+//            m_handler.sendEmptyMessage(MsgRecordStart);
+//        }
+//    };
+
+    private Runnable m_recordLoop = new Runnable() {
+        @Override
+        public void run() {
+            if ((null == m_camera) || (null == m_settings))
+                return;
+
+            if (m_camera.isRecording()) {
+                Log.i(TAG, "recording stop ... ");
+                m_handler.sendEmptyMessage(MsgRecordStop);
+            }
+            Log.i(TAG, "recording start .......");
+            if (!isRecording) {
+                m_handler.removeCallbacks(this);
+                return;
+            }
+            Log.i(TAG, "recording start 1.......");
+            m_handler.sendEmptyMessage(MsgRecordStart);
+            m_handler.postDelayed(this, m_settings.getRecordTime() * 1000);
+        }
+    };
 
     @Override
     public void onClick(View v) {
@@ -470,22 +530,17 @@ public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRe
                 break;
 
             case R.id.video:
-                if (m_camera.isRecording()) {
-                    m_handler.sendEmptyMessage(MsgRecordStop);
+                if (null == m_settings)
+                    return;
+
+                if (isRecording) {
+                    Log.i(TAG, "stop recording ==============");
+                    isRecording = false;
                 } else {
-                    m_handler.sendEmptyMessage(MsgRecordStart);
+                    Log.i(TAG, "start recording ==============");
+                    m_handler.post(m_recordLoop);
+                    isRecording = true;
                 }
-//                if (null == m_settings)
-//                    return;
-//
-//                if (isRecording) {
-//                    m_recordTimer.cancel();
-//                    m_handler.sendEmptyMessage(MsgRecordStop);
-//                    isRecording = false;
-//                } else {
-//                    m_recordTimer.schedule(m_recordTask, 3 * 1000,(m_settings.getRecordTime()) * 1000);
-//                    isRecording = true;
-//                }
                 break;
 
             case R.id.info:
@@ -560,20 +615,4 @@ public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRe
                     .create();
         }
     }
-
-    private TimerTask m_recordTask = new TimerTask() {
-        @Override
-        public void run() {
-            if (null == m_camera)
-                return;
-
-            if (m_camera.isRecording()) {
-                Log.i(TAG, "recording stop ... ");
-                m_handler.sendEmptyMessage(MsgRecordStop);
-            }
-            Log.i(TAG, "recording start");
-            m_handler.sendEmptyMessage(MsgRecordStart);
-        }
-    };
-
 }
