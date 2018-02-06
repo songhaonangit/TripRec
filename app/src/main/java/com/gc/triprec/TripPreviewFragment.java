@@ -438,7 +438,7 @@ public class TripPreviewFragment extends Fragment implements FragmentCompat.OnRe
 
                 case MsgRecordStop:
                     if (fragment.m_camera.isRecording()) {
-                        Log.i(TAG, "stop recording");
+//                        Log.i(TAG, "stop recording");
                         fragment.m_camera.stopRecordingVideo();
                         Log.i(TAG, "stop recording 1");
                         fragment.m_nextVideoAbsolutePath = null;

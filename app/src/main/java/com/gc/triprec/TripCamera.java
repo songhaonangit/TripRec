@@ -157,12 +157,26 @@ public class TripCamera {
 
         @Override
         public void onDisconnected(@NonNull CameraDevice camera) {
+            synchronized (m_cameraStateLock) {
+                m_state = STATE_CLOSED;
+                m_cameraOpenCloseLock.release();
+                m_cameraDevice.close();
+                m_cameraDevice = null;
+            }
+
             if (null != m_callback)
                 m_callback.onStateDisconnected();
         }
 
         @Override
         public void onError(@NonNull CameraDevice camera, int error) {
+            synchronized (m_cameraStateLock) {
+                m_state = STATE_CLOSED;
+                m_cameraOpenCloseLock.release();
+                m_cameraDevice.close();
+                m_cameraDevice = null;
+            }
+
             if (null != m_callback)
                 m_callback.onStateError();
         }
@@ -251,9 +265,10 @@ public class TripCamera {
     public void preview(Surface surface) {
         try {
             if (surface == null) {
+                Log.e(TAG, "surface null");
                 return;
             }
-
+            closePreviewSession();
             // We set up a CaptureRequest.Builder with the output Surface.
             m_previewRequestBuilder = m_cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
             m_previewRequestBuilder.addTarget(surface);
@@ -603,9 +618,11 @@ public class TripCamera {
             m_cameraDevice.createCaptureSession(surfaces, new CameraCaptureSession.StateCallback() {
                 @Override
                 public void onConfigured(@NonNull CameraCaptureSession session) {
-                    m_cameraCaptureSession = session;
-                    m_state = STATE_RECORDING;
-                    updatePreview();
+                    synchronized (m_cameraStateLock) {
+                        m_cameraCaptureSession = session;
+                        m_state = STATE_RECORDING;
+                        updatePreview();
+                    }
                     m_mediaRecorder.start();
                 }
 
@@ -624,7 +641,9 @@ public class TripCamera {
 
     public void stopRecordingVideo() {
         /* Todo recording state change */
-        m_state = STATE_PREVIEW;
+        synchronized (m_cameraStateLock) {
+            m_state = STATE_PREVIEW;
+        }
         m_mediaRecorder.stop();
         m_mediaRecorder.reset();
 
