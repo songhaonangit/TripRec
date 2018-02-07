@@ -55,7 +55,7 @@ public class PlaylistAdapter extends BaseAdapter {
     class ViewHolder {
         TextView m_tvname;
         public ViewHolder(View view) {
-            m_tvname = (TextView) view.findViewById(R.id.file_name);
+            m_tvname = view.findViewById(R.id.file_name);
             view.setTag(this);
         }
     }
