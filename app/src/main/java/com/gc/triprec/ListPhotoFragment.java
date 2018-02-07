@@ -185,9 +185,8 @@ public class ListPhotoFragment extends Fragment implements PlaylistAdapter.Adapt
             public int compare(File file1, File file2) {
                 if(file1.lastModified() < file2.lastModified())
                     return 1;
-                    //注意！！返回值必须是一对相反数，否则无效。jdk1.7以后就是这样。
-                    //      else return 0; //无效
-                else return -1;
+                else
+                    return -1;
             }
         };
 
