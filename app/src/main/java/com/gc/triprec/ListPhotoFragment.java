@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -20,6 +22,7 @@ import com.orangegangsters.github.swipyrefreshlayout.library.SwipyRefreshLayout;
 import com.orangegangsters.github.swipyrefreshlayout.library.SwipyRefreshLayoutDirection;
 
 import java.io.File;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +30,7 @@ public class ListPhotoFragment extends Fragment implements PlaylistAdapter.Adapt
     private SwipyRefreshLayout m_swipeRefreshLayout;
     private SwipeMenuListView m_listView;
     private PlaylistAdapter m_adapter;
+    private File[] m_files;
     private int m_position = 0;
     private List<String> m_photolist = new ArrayList<>();
 
@@ -83,6 +87,7 @@ public class ListPhotoFragment extends Fragment implements PlaylistAdapter.Adapt
                     case 0:
                         // delete
                         Log.i(TAG, "del " + item);
+                        m_handler.sendEmptyMessage(MsgDelFile);
                         break;
                 }
                 return false;
@@ -118,6 +123,37 @@ public class ListPhotoFragment extends Fragment implements PlaylistAdapter.Adapt
                 getResources().getDisplayMetrics());
     }
 
+    private static final int MsgDelFile = 0;
+    private ListHandler m_handler = new ListHandler(this);
+    private static class ListHandler extends Handler {
+        private final WeakReference<ListPhotoFragment> m_fragment;
+
+        ListHandler(ListPhotoFragment fragment) {
+            m_fragment = new WeakReference<>(fragment);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+
+            ListPhotoFragment fragment = m_fragment.get();
+            if (null == fragment) {
+                return;
+            }
+
+            switch (msg.what) {
+                case MsgDelFile:
+                    fragment.m_photolist.remove(fragment.m_position);
+                    fragment.m_adapter.notifyDataSetChanged();
+                    fragment.m_files[fragment.m_position].delete();
+                    break;
+
+                default:
+                    break;
+            }
+        }
+    }
+
     private SwipyRefreshLayout.OnRefreshListener m_refreshListener = new SwipyRefreshLayout.OnRefreshListener() {
         @Override
         public void onRefresh(SwipyRefreshLayoutDirection swipyRefreshLayoutDirection) {
@@ -136,8 +172,8 @@ public class ListPhotoFragment extends Fragment implements PlaylistAdapter.Adapt
             return;
         }
 
-        File[] files = appDir.listFiles();
-        for (File file : files) {
+        m_files = appDir.listFiles();
+        for (File file : m_files) {
             Log.i(TAG, "photo : " + file.getName());
             m_photolist.add(file.getName());
         }
