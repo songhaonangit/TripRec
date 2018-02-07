@@ -5,12 +5,12 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 
 import com.otaliastudios.cameraview.CameraListener;
 import com.otaliastudios.cameraview.CameraOptions;
@@ -23,7 +23,9 @@ import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private CameraView m_camera;
-    private File m_file;
+    private boolean m_isTakePhoto = false;
+    private boolean m_isTakeVideo = false;
+    private TripRecSettings m_settings;
     private static final String TAG = "MainActivity";
 
     @Override
@@ -31,8 +33,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Log.i(TAG, "onCreate");
-
-        m_file = new File(getVideoFilePath(this));
+        m_settings = new TripRecSettings(this);
         m_camera = findViewById(R.id.camera);
         m_camera.addCameraListener(m_cameraListener);
         findViewById(R.id.picture).setOnClickListener(this);
@@ -75,14 +76,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onPictureTaken(byte[] jpeg) {
             super.onPictureTaken(jpeg);
+            m_isTakePhoto = false;
             Log.i(TAG, "onPictureTaken" + String.valueOf(jpeg.length));
-            saveImage(BitmapFactory.decodeByteArray(jpeg, 0, jpeg.length));
+            savePhoto(BitmapFactory.decodeByteArray(jpeg, 0, jpeg.length));
         }
 
         @Override
         public void onVideoTaken(File video) {
             super.onVideoTaken(video);
             Log.i(TAG, "onVideoTaken");
+            m_isTakeVideo = false;
+            if (null == m_settings) {
+                return;
+            }
+            m_camera.startCapturingVideo(getVideoFilePath(), m_settings.getRecordTime() * 1000);
         }
     };
 
@@ -98,20 +105,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    public String getVideoFilePath(Context context) {
-        final File dir = context.getExternalFilesDir(null);
-        return (dir == null ? "" : (dir.getAbsolutePath() + "/"))
-                + System.currentTimeMillis() + ".mp4";
-    }
-
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.picture:
+                if (m_isTakePhoto) {
+                    return;
+                }
+                m_isTakePhoto = true;
                 m_camera.captureSnapshot();
                 break;
 
             case R.id.video:
+                if (m_isTakePhoto || m_isTakeVideo) {
+                    return;
+                }
+                m_isTakeVideo = true;
+
+                if (null == m_settings) {
+                    return;
+                }
+                m_camera.startCapturingVideo(getVideoFilePath(), m_settings.getRecordTime() * 1000);
 
                 break;
 
@@ -128,7 +142,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private void saveImage(Bitmap bmp) {
+    public File getVideoFilePath() {
+        File appDir = new File(getExternalFilesDir(null), "video");
+        if (!appDir.exists()) {
+            appDir.mkdir();
+        }
+
+        String filename = System.currentTimeMillis() + ".mp4";
+        File file = new File(appDir, filename);
+
+        return file;
+    }
+
+    private void saveVideo(File file) {
+
+        try {
+            FileOutputStream fos = new FileOutputStream(file);
+            fos.flush();
+            fos.close();
+        } catch (FileNotFoundException e) {
+                e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void savePhoto(Bitmap bmp) {
         File appDir = new File(getExternalFilesDir(null), "photo");
         if (!appDir.exists()) {
             appDir.mkdir();
