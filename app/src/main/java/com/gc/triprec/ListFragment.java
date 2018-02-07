@@ -24,14 +24,12 @@ import com.orangegangsters.github.swipyrefreshlayout.library.SwipyRefreshLayoutD
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public abstract class ListFragment extends Fragment implements PlaylistAdapter.AdapterCallback {
     private SwipyRefreshLayout m_swipeRefreshLayout;
     private SwipeMenuListView m_listView;
     private PlaylistAdapter m_adapter;
-    public File[] m_files;
     public List<File> m_filelist = new ArrayList<>();
     private int m_position = 0;
 
@@ -146,7 +144,7 @@ public abstract class ListFragment extends Fragment implements PlaylistAdapter.A
                 case MsgDelFile:
                     fragment.m_filelist.remove(fragment.m_position);
                     fragment.m_adapter.notifyDataSetChanged();
-                    fragment.m_files[fragment.m_position].delete();
+                    fragment.m_filelist.get(fragment.m_position).delete();
                     break;
 
                 default:

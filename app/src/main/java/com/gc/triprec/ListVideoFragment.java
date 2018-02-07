@@ -26,8 +26,8 @@ public class ListVideoFragment extends ListFragment {
             return;
         }
 
-        m_files = appDir.listFiles();
-        for (File file : m_files) {
+        File[] files = appDir.listFiles();
+        for (File file : files) {
             Log.i(TAG, "video : " + file.getName());
             m_filelist.add(file);
         }
