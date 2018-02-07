@@ -5,13 +5,14 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import java.io.File;
 import java.util.List;
 
 public class PlaylistAdapter extends BaseAdapter {
-    private List<String> m_filelist;
+    private List<File> m_filelist;
     private static final String TAG = "PlaylistAdapter";
 
-    PlaylistAdapter(List<String> filelist, AdapterCallback callback) {
+    PlaylistAdapter(List<File> filelist, AdapterCallback callback) {
         super();
         m_filelist = filelist;
         m_callback = callback;
@@ -39,8 +40,8 @@ public class PlaylistAdapter extends BaseAdapter {
             new ViewHolder(convertView);
         }
         ViewHolder holder = (ViewHolder) convertView.getTag();
-        String item = (String)getItem(position);
-        holder.m_tvname.setText(item);
+        File item = (File)getItem(position);
+        holder.m_tvname.setText(item.getName());
         holder.m_tvname.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

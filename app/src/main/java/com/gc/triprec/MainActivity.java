@@ -21,6 +21,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private CameraView m_camera;
@@ -173,7 +175,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             appDir.mkdir();
         }
 
-        String filename = System.currentTimeMillis() + ".mp4";
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+        Date date = new Date(System.currentTimeMillis());
+        String filename = simpleDateFormat.format(date) + ".mp4";
         File file = new File(appDir, filename);
 
         return file;
@@ -184,8 +188,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (!appDir.exists()) {
             appDir.mkdir();
         }
-        String fileName = System.currentTimeMillis() + ".jpg";
-        File file = new File(appDir, fileName);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+        Date date = new Date(System.currentTimeMillis());
+        String filename = simpleDateFormat.format(date) + ".jpg";
+
+        File file = new File(appDir, filename);
         try {
             FileOutputStream fos = new FileOutputStream(file);
             bmp.compress(Bitmap.CompressFormat.JPEG, 100, fos);

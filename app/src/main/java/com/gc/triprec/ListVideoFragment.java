@@ -26,6 +26,7 @@ import com.orangegangsters.github.swipyrefreshlayout.library.SwipyRefreshLayoutD
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class ListVideoFragment extends Fragment implements PlaylistAdapter.AdapterCallback {
@@ -34,7 +35,7 @@ public class ListVideoFragment extends Fragment implements PlaylistAdapter.Adapt
     private PlaylistAdapter m_adapter;
     private File[] m_files;
     private int m_position = 0;
-    private List<String> m_videolist = new ArrayList<>();
+    private List<File> m_videolist = new ArrayList<>();
     private static final String TAG = "ListVideoFragment";
 
     @Nullable
@@ -84,7 +85,7 @@ public class ListVideoFragment extends Fragment implements PlaylistAdapter.Adapt
             @Override
             public boolean onMenuItemClick(int position, SwipeMenu menu, int index) {
                 m_position  = position;
-                String item = m_videolist.get(position);
+                String item = m_videolist.get(position).getName();
                 switch (index) {
                     case 0:
                         // delete
@@ -178,7 +179,20 @@ public class ListVideoFragment extends Fragment implements PlaylistAdapter.Adapt
         m_files = appDir.listFiles();
         for (File file : m_files) {
             Log.i(TAG, "video : " + file.getName());
-            m_videolist.add(file.getName());
+            m_videolist.add(file);
         }
+
+        Comparator c = new Comparator<File>() {
+            @Override
+            public int compare(File file1, File file2) {
+                if(file1.lastModified() < file2.lastModified())
+                    return 1;
+                    //注意！！返回值必须是一对相反数，否则无效。jdk1.7以后就是这样。
+                    //      else return 0; //无效
+                else return -1;
+            }
+        };
+
+        m_videolist.sort(c);
     }
 }
