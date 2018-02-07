@@ -139,6 +139,7 @@ public class ListPhotoFragment extends Fragment implements PlaylistAdapter.Adapt
         File[] files = appDir.listFiles();
         for (File file : files) {
             Log.i(TAG, "photo : " + file.getName());
+            m_photolist.add(file.getName());
         }
     }
 }

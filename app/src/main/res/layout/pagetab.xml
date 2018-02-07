@@ -10,7 +10,7 @@
     app:stl_indicatorWidth="auto"
     app:stl_indicatorAlwaysInCenter="true"
     app:stl_defaultTabTextHorizontalPadding="24dp"
-    app:stl_indicatorColor="@color/colorAccent"
+    app:stl_indicatorColor="#4285f4"
     app:stl_indicatorInterpolation="smart"
     app:stl_titleOffset="auto_center"
     app:stl_indicatorThickness="3dp"

@@ -105,15 +105,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onVideoTaken(File video) {
             super.onVideoTaken(video);
-            Log.i(TAG, "onVideoTaken");
-            if (!m_isTakeVideo) {
-                return;
-            }
-            m_isTakeVideo = false;
+
             if (null == m_settings) {
                 return;
             }
-            m_camera.startCapturingVideo(getVideoFilePath(), m_settings.getRecordTime() * 1000);
+
+            if (m_isTakeVideo) {
+                m_camera.startCapturingVideo(getVideoFilePath(), m_settings.getRecordTime() * 1000);
+                m_isTakeVideo = true;
+            }
         }
     };
 
@@ -146,16 +146,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
 
                 if (m_isTakeVideo) {
-                    m_camera.stopCapturingVideo();
                     m_isTakeVideo = false;
-                    return;
+                    m_camera.stopCapturingVideo();
+                } else {
+                    m_isTakeVideo = true;
+                    m_camera.startCapturingVideo(getVideoFilePath(), m_settings.getRecordTime() * 1000);
                 }
-                m_isTakeVideo = true;
-
-                if (null == m_settings) {
-                    return;
-                }
-                m_camera.startCapturingVideo(getVideoFilePath(), m_settings.getRecordTime() * 1000);
                 break;
 
             case R.id.playback:

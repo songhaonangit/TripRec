@@ -142,6 +142,7 @@ public class ListVideoFragment extends Fragment implements PlaylistAdapter.Adapt
         File[] files = appDir.listFiles();
         for (File file : files) {
             Log.i(TAG, "video : " + file.getName());
+            m_videolist.add(file.getName());
         }
     }
 }
