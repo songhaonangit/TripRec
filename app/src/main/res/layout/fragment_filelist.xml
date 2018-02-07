@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.orangegangsters.github.swipyrefreshlayout.library.SwipyRefreshLayout
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/swipy_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:srl_direction="bottom"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <com.baoyz.swipemenulistview.SwipeMenuListView
+        android:id="@+id/swipfilelist_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</com.orangegangsters.github.swipyrefreshlayout.library.SwipyRefreshLayout>

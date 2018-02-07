@@ -3,6 +3,7 @@
     <string name="picture">Picture</string>
     <string name="settings">Setting</string>
     <string name="video">Video</string>
+    <string name="playlist">Playback</string>
     <string name="description_info">Info</string>
     <string name="request_permission">This app needs camera permission.</string>
     <string name="permission_request">This sample needs permission for camera and audio recording.</string>
@@ -11,7 +12,7 @@
         <item>2min</item>
         <item>3min</item>
     </string-array>
-    <string name="key_recorden" > recorden </string>
+    <string name="key_recorden"> recorden </string>
     <string name="def_recordtime"> 15s </string>
     <string name="key_recordtime"> recordtime </string>
     <string name="title_activity_settings">Settings</string>

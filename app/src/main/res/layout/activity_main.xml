@@ -63,6 +63,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="@string/picture"
+                android:textSize="12sp"
                 android:layout_weight="1"/>
 
             <Button
@@ -70,13 +71,15 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="@string/video"
+                android:textSize="12sp"
                 android:layout_weight="1"/>
 
             <Button
-                android:id="@+id/settings"
+                android:id="@+id/playback"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="@string/settings"
+                android:textSize="12sp"
+                android:text="@string/playlist"
                 android:layout_weight="1"/>
 
         </LinearLayout>

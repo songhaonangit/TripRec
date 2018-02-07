@@ -1,0 +1,10 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.gc.triprec.MainActivity" >
+
+    <group android:id="@+id/menuGroup_main">
+        <item android:id="@+id/action_settings"
+            android:title="@string/settings"/>
+    </group>
+
+</menu>

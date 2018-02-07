@@ -8,6 +8,9 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.otaliastudios.cameraview.CameraListener;
@@ -36,7 +39,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         m_camera.addCameraListener(m_cameraListener);
         findViewById(R.id.picture).setOnClickListener(this);
         findViewById(R.id.video).setOnClickListener(this);
-        findViewById(R.id.settings).setOnClickListener(this);
+        findViewById(R.id.playback).setOnClickListener(this);
         findViewById(R.id.info).setOnClickListener(this);
     }
 
@@ -56,6 +59,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onDestroy() {
         super.onDestroy();
         m_camera.destroy();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // action with ID action_settings was selected
+            case R.id.action_settings:
+                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+                break;
+            default:
+                break;
+        }
+        return true;
     }
 
     private CameraListener m_cameraListener = new CameraListener() {
@@ -133,11 +156,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     return;
                 }
                 m_camera.startCapturingVideo(getVideoFilePath(), m_settings.getRecordTime() * 1000);
-
                 break;
 
-            case R.id.settings:
-                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+            case R.id.playback:
+                startActivity(new Intent(MainActivity.this, PlaylistActivity.class));
                 break;
 
             case R.id.info:
@@ -179,5 +201,4 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             e.printStackTrace();
         }
     }
-
 }
