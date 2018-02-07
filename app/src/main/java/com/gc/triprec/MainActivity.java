@@ -1,11 +1,9 @@
 package com.gc.triprec;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -85,6 +83,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         public void onVideoTaken(File video) {
             super.onVideoTaken(video);
             Log.i(TAG, "onVideoTaken");
+            if (!m_isTakeVideo) {
+                return;
+            }
             m_isTakeVideo = false;
             if (null == m_settings) {
                 return;
@@ -117,7 +118,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
 
             case R.id.video:
-                if (m_isTakePhoto || m_isTakeVideo) {
+                if (m_isTakePhoto) {
+                    return;
+                }
+
+                if (m_isTakeVideo) {
+                    m_camera.stopCapturingVideo();
+                    m_isTakeVideo = false;
                     return;
                 }
                 m_isTakeVideo = true;
@@ -152,19 +159,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         File file = new File(appDir, filename);
 
         return file;
-    }
-
-    private void saveVideo(File file) {
-
-        try {
-            FileOutputStream fos = new FileOutputStream(file);
-            fos.flush();
-            fos.close();
-        } catch (FileNotFoundException e) {
-                e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     private void savePhoto(Bitmap bmp) {
