@@ -45,7 +45,7 @@ public class PlaylistAdapter extends BaseAdapter {
             @Override
             public void onClick(View v) {
                 if (null != m_callback)
-                    m_callback.startPlayback((String)getItem(position));
+                    m_callback.startPlayback(position);
             }
         });
         return convertView;
@@ -60,7 +60,7 @@ public class PlaylistAdapter extends BaseAdapter {
     }
 
     public interface AdapterCallback {
-        void startPlayback(String item);
+        void startPlayback(int position);
     }
 
     private AdapterCallback m_callback;

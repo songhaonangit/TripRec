@@ -1,8 +1,10 @@
 package com.gc.triprec;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -161,8 +163,10 @@ public class ListVideoFragment extends Fragment implements PlaylistAdapter.Adapt
     };
 
     @Override
-    public void startPlayback(String item) {
-
+    public void startPlayback(int position) {
+        Intent intent = new Intent(getActivity().getApplicationContext(), PlaybackVideoActivity.class);
+        intent.putExtra("video", Uri.fromFile(m_files[position]));
+        startActivity(intent);
     }
 
     private void searchFiles(Context context) {

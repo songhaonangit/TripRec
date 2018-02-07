@@ -162,7 +162,7 @@ public class ListPhotoFragment extends Fragment implements PlaylistAdapter.Adapt
     };
 
     @Override
-    public void startPlayback(String item) {
+    public void startPlayback(int position) {
 
     }
 
