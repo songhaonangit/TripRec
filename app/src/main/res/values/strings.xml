@@ -37,4 +37,16 @@
         <item>180</item>
     </string-array>
 
+    <string name="pref_title_max_videofile_count"> Set recording video file max count </string>
+    <string-array name="pref_max_videofile_list_title">
+        <item>100</item>
+        <item>200</item>
+        <item>300</item>
+    </string-array>
+    <string-array name="pref_max_videofile_list_value">
+        <item>100</item>
+        <item>200</item>
+        <item>300</item>
+    </string-array>
+
 </resources>
