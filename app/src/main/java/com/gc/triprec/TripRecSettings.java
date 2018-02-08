@@ -20,9 +20,15 @@ public class TripRecSettings {
         editor.apply();
     }
 
-    public void setRecordEnable(String time) {
+    public void setRecordTime(String time) {
         SharedPreferences.Editor editor = m_settings.edit();
         editor.putString(Constants.SettingConstants.KEY_RECORD_TIME, time);
+        editor.apply();
+    }
+
+    public void setVideofilesCount(String count) {
+        SharedPreferences.Editor editor = m_settings.edit();
+        editor.putString(Constants.SettingConstants.KEY_VIDEOFILE_MAX_COUNT, count);
         editor.apply();
     }
 
@@ -36,5 +42,12 @@ public class TripRecSettings {
         Log.i(TAG, "get recordtime: " + String.valueOf(recordtime));
 
         return recordtime;
+    }
+
+    public int getVideofilesCount() {
+        String count = m_settings.getString(Constants.SettingConstants.KEY_VIDEOFILE_MAX_COUNT, "100");
+        int maxcount = Integer.parseInt(count);
+        Log.i(TAG, "get videofile count: " + count);
+        return maxcount;
     }
 }

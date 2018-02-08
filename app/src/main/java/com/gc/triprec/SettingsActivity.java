@@ -3,6 +3,7 @@ package com.gc.triprec;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -35,7 +36,9 @@ import java.util.List;
  * API Guide</a> for more information on developing a Settings UI.
  */
 public class SettingsActivity extends AppCompatPreferenceActivity {
+    private TripRecSettings m_settings;
     private static final String TAG = "SettingsActivity";
+
     /**
      * A preference value change listener that updates the preference's summary
      * to reflect its new value.
@@ -154,7 +157,11 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             recordtimePref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
-                    Log.i(TAG, "new Value" + (String) newValue);
+                    Log.i(TAG, "new recordtime" + (String) newValue);
+                    SharedPreferences.Editor editor = preference.getSharedPreferences().edit();
+                    editor.putString(Constants.SettingConstants.KEY_RECORD_TIME, (String) newValue);
+                    editor.apply();
+
                     if (newValue.equals("60")) {
                         preference.setSummary("1 min");
                     } else if (newValue.equals("120")) {
@@ -163,6 +170,28 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                         preference.setSummary("3 min");
                     } else {
                         preference.setSummary("1 min");
+                    }
+                    return true;
+                }
+            });
+
+            Preference videofilesPref = findPreference("max_videofiles");
+            videofilesPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    Log.i(TAG, "new videofiles count: " + (String) newValue);
+                    SharedPreferences.Editor editor = preference.getSharedPreferences().edit();
+                    editor.putString(Constants.SettingConstants.KEY_VIDEOFILE_MAX_COUNT, (String) newValue);
+                    editor.apply();
+
+                    if (newValue.equals("100")) {
+                        preference.setSummary("100");
+                    } else if (newValue.equals("200")) {
+                        preference.setSummary("200");
+                    } else if (newValue.equals("300")) {
+                        preference.setSummary("300");
+                    } else {
+                        preference.setSummary("100");
                     }
                     return true;
                 }
