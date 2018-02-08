@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageButton;
 
 import com.otaliastudios.cameraview.CameraListener;
 import com.otaliastudios.cameraview.CameraOptions;
@@ -29,6 +30,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private CameraView m_camera;
     private boolean m_isTakePhoto = false;
     private boolean m_isTakeVideo = false;
+    private ImageButton m_btnVideo;
     private TripRecSettings m_settings;
     private static final String TAG = "MainActivity";
 
@@ -41,8 +43,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         m_camera = findViewById(R.id.camera);
         m_camera.addCameraListener(m_cameraListener);
         findViewById(R.id.picture).setOnClickListener(this);
-        findViewById(R.id.video).setOnClickListener(this);
         findViewById(R.id.playback).setOnClickListener(this);
+        m_btnVideo = findViewById(R.id.video);
+        m_btnVideo.setOnClickListener(this);
     }
 
     @Override
@@ -150,14 +153,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
 
             case R.id.video:
+
                 if (m_isTakePhoto) {
                     return;
                 }
 
                 if (m_isTakeVideo) {
+                    m_btnVideo.setImageDrawable(getResources().getDrawable(R.drawable.ic_videocam_off_black_24dp, null));
                     m_isTakeVideo = false;
                     m_camera.stopCapturingVideo();
                 } else {
+                    m_btnVideo.setImageDrawable(getResources().getDrawable(R.drawable.ic_videocam_black_24dp, null));
                     m_isTakeVideo = true;
                     takeVideo();
                 }
