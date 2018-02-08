@@ -25,7 +25,7 @@
     <string name="pref_title_record_enable">Enable recording</string>
     <string name="pref_description_record_enable"> Enable recording your trip from start to finish </string>
 
-    <string name="pref_title_add_friends_to_messages"> Set recording time </string>
+    <string name="pref_title_recordtime"> Set recording time </string>
     <string-array name="pref_recordtime_list_titles">
         <item>1 min</item>
         <item>2 min</item>
