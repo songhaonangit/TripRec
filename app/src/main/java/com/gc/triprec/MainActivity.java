@@ -39,7 +39,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Log.i(TAG, "onCreate");
-        m_settings = new TripRecSettings(this);
         m_camera = findViewById(R.id.camera);
         m_camera.addCameraListener(m_cameraListener);
         findViewById(R.id.picture).setOnClickListener(this);
@@ -49,9 +48,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        m_settings = new TripRecSettings(this);
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         m_camera.start();
+        if (!m_settings.getRecordEnable()) {
+            m_isTakeVideo = false;
+            m_btnVideo.setImageDrawable(getResources().getDrawable(R.drawable.ic_videocam_black_24dp, null));
+        } else {
+            m_isTakeVideo = true;
+            takeVideo();
+            m_btnVideo.setImageDrawable(getResources().getDrawable(R.drawable.ic_videocam_off_black_24dp, null));
+        }
     }
 
     @Override
@@ -159,11 +172,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
 
                 if (m_isTakeVideo) {
-                    m_btnVideo.setImageDrawable(getResources().getDrawable(R.drawable.ic_videocam_off_black_24dp, null));
+                    m_btnVideo.setImageDrawable(getResources().getDrawable(R.drawable.ic_videocam_black_24dp, null));
                     m_isTakeVideo = false;
                     m_camera.stopCapturingVideo();
                 } else {
-                    m_btnVideo.setImageDrawable(getResources().getDrawable(R.drawable.ic_videocam_black_24dp, null));
+                    m_btnVideo.setImageDrawable(getResources().getDrawable(R.drawable.ic_videocam_off_black_24dp, null));
                     m_isTakeVideo = true;
                     takeVideo();
                 }

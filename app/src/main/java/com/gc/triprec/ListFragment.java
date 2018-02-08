@@ -142,9 +142,9 @@ public abstract class ListFragment extends Fragment implements PlaylistAdapter.A
 
             switch (msg.what) {
                 case MsgDelFile:
+                    fragment.m_filelist.get(fragment.m_position).delete();
                     fragment.m_filelist.remove(fragment.m_position);
                     fragment.m_adapter.notifyDataSetChanged();
-                    fragment.m_filelist.get(fragment.m_position).delete();
                     break;
 
                 default:
