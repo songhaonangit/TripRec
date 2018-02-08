@@ -42,7 +42,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.picture).setOnClickListener(this);
         findViewById(R.id.video).setOnClickListener(this);
         findViewById(R.id.playback).setOnClickListener(this);
-        findViewById(R.id.info).setOnClickListener(this);
     }
 
     @Override
@@ -76,6 +75,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             // action with ID action_settings was selected
             case R.id.action_settings:
                 startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+                break;
+
+            case R.id.action_info:
+
                 break;
             default:
                 break;
@@ -159,11 +162,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.playback:
                 startActivity(new Intent(MainActivity.this, PlaylistActivity.class));
                 break;
-
-            case R.id.info:
-
-                break;
-
             default:
                 break;
         }

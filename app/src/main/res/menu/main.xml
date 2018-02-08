@@ -5,6 +5,8 @@
     <group android:id="@+id/menuGroup_main">
         <item android:id="@+id/action_settings"
             android:title="@string/settings"/>
+        <item android:id="@+id/action_info"
+            android:title="@string/description_info"/>
     </group>
 
 </menu>
