@@ -26,6 +26,7 @@ dependencies {
     })
     allprojects {
         repositories {
+            maven { url "https://jitpack.io" }
             jcenter()
         }
     }
@@ -41,5 +42,6 @@ dependencies {
     compile 'com.scwang.smartrefresh:SmartRefreshHeader:1.0.3'
     compile 'com.ogaclejapan.smarttablayout:library:1.6.1@aar'
     compile 'com.ogaclejapan.smarttablayout:utils-v4:1.6.1@aar'
+    compile 'com.github.chrisbanes:PhotoView:2.0.0'
     testCompile 'junit:junit:4.12'
 }

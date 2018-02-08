@@ -1,6 +1,7 @@
 package com.gc.triprec;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 
 import java.io.File;
@@ -12,7 +13,9 @@ public class ListPhotoFragment extends ListFragment {
 
     @Override
     public void playback(int m_position) {
-
+        Intent intent = new Intent(getActivity().getApplicationContext(), PlaybackPhotoActivity.class);
+        intent.putExtra("photo", m_position);
+        startActivity(intent);
     }
 
     @Override
