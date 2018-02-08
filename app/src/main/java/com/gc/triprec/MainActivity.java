@@ -1,5 +1,6 @@
 package com.gc.triprec;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -78,7 +79,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
 
             case R.id.action_info:
-
+                new AlertDialog.Builder(this)
+                        .setMessage(R.string.intro_message)
+                        .setPositiveButton(android.R.string.ok, null)
+                        .show();
                 break;
             default:
                 break;
