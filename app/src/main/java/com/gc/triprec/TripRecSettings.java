@@ -20,6 +20,12 @@ public class TripRecSettings {
         editor.apply();
     }
 
+    public void setOverrideEnable(boolean enable) {
+        SharedPreferences.Editor editor = m_settings.edit();
+        editor.putBoolean(Constants.SettingConstants.KEY_OVERRIDE_ENABLE, enable);
+        editor.apply();
+    }
+
     public void setRecordTime(String time) {
         SharedPreferences.Editor editor = m_settings.edit();
         editor.putString(Constants.SettingConstants.KEY_RECORD_TIME, time);
@@ -34,6 +40,10 @@ public class TripRecSettings {
 
     public boolean getRecordEnable() {
         return m_settings.getBoolean(Constants.SettingConstants.KEY_RECORD_ENABLE, false);
+    }
+
+    public boolean getOverrideEnable() {
+        return m_settings.getBoolean(Constants.SettingConstants.KEY_OVERRIDE_ENABLE, false);
     }
 
     public int getRecordTime() {

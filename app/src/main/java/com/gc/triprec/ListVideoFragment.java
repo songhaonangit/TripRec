@@ -32,7 +32,6 @@ public class ListVideoFragment extends ListFragment {
             m_filelist.add(file);
         }
 
-
         Comparator c = new Comparator<File>() {
             @Override
             public int compare(File file1, File file2) {

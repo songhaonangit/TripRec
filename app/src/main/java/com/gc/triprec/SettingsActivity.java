@@ -202,10 +202,19 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         @Override
         public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
             Log.i(TAG, "Key set: " + preference.getKey());
+            boolean enable = true;
+            SharedPreferences.Editor editor = preference.getSharedPreferences().edit();
             if (preference.getKey().equals("recorden")) {
-                boolean enable = preference.getSharedPreferences().getBoolean(preference.getKey(), true);
+                enable = preference.getSharedPreferences().getBoolean(preference.getKey(), true);
+                Log.i(TAG, "Key set: " + preference.getKey() + String.valueOf(enable));
+            } else if (preference.getKey().equals("override_en")) {
+                enable = preference.getSharedPreferences().getBoolean(preference.getKey(), true);
+                editor.putBoolean(Constants.SettingConstants.KEY_OVERRIDE_ENABLE, enable);
                 Log.i(TAG, "Key set: " + preference.getKey() + String.valueOf(enable));
             }
+
+            editor.apply();
+
             return super.onPreferenceTreeClick(preferenceScreen, preference);
         }
 

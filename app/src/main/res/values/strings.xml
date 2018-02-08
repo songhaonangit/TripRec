@@ -13,6 +13,7 @@
         <item>3min</item>
     </string-array>
     <string name="key_recorden"> recorden </string>
+    <string name="key_override_en"> override_en </string>
     <string name="def_recordtime"> 15s </string>
     <string name="key_recordtime"> recordtime </string>
     <string name="key_max_videofiles"> max_videofiles </string>
@@ -25,6 +26,9 @@
 
     <string name="pref_title_record_enable">Enable recording</string>
     <string name="pref_description_record_enable"> Enable recording your trip from start to finish </string>
+
+    <string name="pref_title_override_enable">Enable override</string>
+    <string name="pref_description_override_enable"> Enable override video files </string>
 
     <string name="pref_title_recordtime"> Set recording time </string>
     <string-array name="pref_recordtime_list_titles">

@@ -120,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
 
             if (m_isTakeVideo) {
-                m_camera.startCapturingVideo(getVideoFilePath(), m_settings.getRecordTime() * 1000);
+                takeVideo();
                 m_isTakeVideo = true;
             }
         }
@@ -159,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     m_camera.stopCapturingVideo();
                 } else {
                     m_isTakeVideo = true;
-                    m_camera.startCapturingVideo(getVideoFilePath(), m_settings.getRecordTime() * 1000);
+                    takeVideo();
                 }
                 break;
 
@@ -205,5 +205,46 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void removeOldestFile() {
+        File appDir = new File(getExternalFilesDir(null), "video");
+        if (!appDir.exists()) {
+            return ;
+        }
+
+        File[] files = appDir.listFiles();
+        File old = files[0];
+        for (File file : files) {
+            if (old.lastModified() < file.lastModified()) {
+                old = file;
+                break;
+            }
+        }
+
+        old.deleteOnExit();
+    }
+
+    private int getFileTotalCount() {
+        File appDir = new File(getExternalFilesDir(null), "video");
+        if (!appDir.exists()) {
+            return 0;
+        }
+
+        File[] files = appDir.listFiles();
+
+        return files.length;
+    }
+
+    private void takeVideo() {
+        if (null == m_settings)
+            return;
+
+        if (m_settings.getOverrideEnable()) {
+            if (getFileTotalCount() < m_settings.getVideofilesCount()) {
+                removeOldestFile();
+            }
+        }
+        m_camera.startCapturingVideo(getVideoFilePath(), m_settings.getRecordTime() * 1000);
     }
 }
