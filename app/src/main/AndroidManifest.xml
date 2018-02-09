@@ -30,7 +30,7 @@
             android:label="@string/title_activity_settings" />
         <activity android:name=".PlaylistActivity" />
         <activity android:name=".PlaybackVideoActivity" />
-        <activity android:name=".PlaybackPhotoActivity"></activity>
+        <activity android:name=".PlaybackPhotoActivity"/>
     </application>
 
 </manifest>
