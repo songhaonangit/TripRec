@@ -2,10 +2,13 @@ package com.gc.triprec;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.util.Log;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.ListIterator;
 
 public class ListPhotoFragment extends ListFragment {
 
@@ -42,6 +45,17 @@ public class ListPhotoFragment extends ListFragment {
             }
         };
 
-        m_filelist.sort(c);
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+            m_filelist.sort(c);
+        } else {
+            Object[] a = m_filelist.toArray();
+            Arrays.sort(a, (Comparator) c);
+            ListIterator<File> i = m_filelist.listIterator();
+            for (Object e : a) {
+                i.next();
+                i.set((File) e);
+            }
+        }
+
     }
 }

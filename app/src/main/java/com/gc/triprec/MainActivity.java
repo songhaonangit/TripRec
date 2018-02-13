@@ -5,9 +5,11 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatDelegate;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -38,6 +40,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
+            AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+        }
         Log.i(TAG, "onCreate");
         m_camera = findViewById(R.id.camera);
         m_camera.addCameraListener(m_cameraListener);
@@ -59,11 +64,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         m_camera.start();
         if (!m_settings.getRecordEnable()) {
             m_isTakeVideo = false;
-            m_btnVideo.setImageDrawable(getResources().getDrawable(R.drawable.ic_videocam_black_24dp, null));
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                m_btnVideo.setImageDrawable(getResources().getDrawable(R.drawable.ic_videocam_black_24dp, null));
+            } else {
+                m_btnVideo.setImageDrawable(getResources().getDrawable(R.drawable.ic_videocam_black_24dp));
+            }
         } else {
             m_isTakeVideo = true;
             takeVideo();
-            m_btnVideo.setImageDrawable(getResources().getDrawable(R.drawable.ic_videocam_off_black_24dp, null));
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                m_btnVideo.setImageDrawable(getResources().getDrawable(R.drawable.ic_videocam_off_black_24dp, null));
+            } else {
+                m_btnVideo.setImageDrawable(getResources().getDrawable(R.drawable.ic_videocam_off_black_24dp));
+            }
         }
     }
 
@@ -172,11 +185,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
 
                 if (m_isTakeVideo) {
-                    m_btnVideo.setImageDrawable(getResources().getDrawable(R.drawable.ic_videocam_black_24dp, null));
+                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                        m_btnVideo.setImageDrawable(getResources().getDrawable(R.drawable.ic_videocam_black_24dp, null));
+                    } else {
+                        m_btnVideo.setImageDrawable(getResources().getDrawable(R.drawable.ic_videocam_black_24dp));
+                    }
                     m_isTakeVideo = false;
                     m_camera.stopCapturingVideo();
                 } else {
-                    m_btnVideo.setImageDrawable(getResources().getDrawable(R.drawable.ic_videocam_off_black_24dp, null));
+                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                        m_btnVideo.setImageDrawable(getResources().getDrawable(R.drawable.ic_videocam_off_black_24dp, null));
+                    } else {
+                        m_btnVideo.setImageDrawable(getResources().getDrawable(R.drawable.ic_videocam_off_black_24dp));
+                    }
                     m_isTakeVideo = true;
                     takeVideo();
                 }
