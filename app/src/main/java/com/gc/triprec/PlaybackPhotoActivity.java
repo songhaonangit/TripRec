@@ -2,6 +2,7 @@ package com.gc.triprec;
 
 import android.content.Context;
 import android.net.Uri;
+import android.os.Build;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.ViewGroup.LayoutParams;
@@ -15,8 +16,10 @@ import com.github.chrisbanes.photoview.PhotoView;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.ListIterator;
 
 public class PlaybackPhotoActivity extends AppCompatActivity {
     private static final String TAG = "PlaybackPhotoActivity";
@@ -93,7 +96,18 @@ public class PlaybackPhotoActivity extends AppCompatActivity {
                 }
             };
 
-            m_filelist.sort(c);
+
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                m_filelist.sort(c);
+            } else {
+                Object[] a = m_filelist.toArray();
+                Arrays.sort(a, (Comparator) c);
+                ListIterator<File> i = m_filelist.listIterator();
+                for (Object e : a) {
+                    i.next();
+                    i.set((File) e);
+                }
+            }
         }
     }
 }
