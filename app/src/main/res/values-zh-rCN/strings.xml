@@ -1,0 +1,60 @@
+<resources>
+    <string name="app_name">行车记录</string>
+    <string name="picture">照片</string>
+    <string name="settings">设置</string>
+    <string name="video">视频</string>
+    <string name="playlist">回放</string>
+    <string name="description_info">信息</string>
+    <string name="request_permission">app 需要camera权限</string>
+    <string name="permission_request">app 需要camera和音频权限</string>
+    <string-array name="time_list">
+        <item>1分钟</item>
+        <item>2分钟</item>
+        <item>3分钟</item>
+    </string-array>
+    <string name="key_recorden"> recorden </string>
+    <string name="key_override_en"> override_en </string>
+    <string name="def_recordtime"> 15秒</string>
+    <string name="key_recordtime"> recordtime </string>
+    <string name="key_max_videofiles"> max_videofiles </string>
+    <string name="title_activity_settings">设置</string>
+
+    <!-- Strings related to Settings -->
+
+    <!-- Example General settings -->
+    <string name="pref_header_general">基本设置</string>
+
+    <string name="pref_title_record_enable">开启录制</string>
+    <string name="pref_description_record_enable"> 开启录制整个行程 </string>
+
+    <string name="pref_title_override_enable">开启覆盖录制</string>
+    <string name="pref_description_override_enable"> 开启视频文件覆盖录制 </string>
+
+    <string name="pref_title_recordtime"> 设置录制时长 </string>
+    <string-array name="pref_recordtime_list_titles">
+        <item>1分钟</item>
+        <item>2分钟</item>
+        <item>3分钟</item>
+    </string-array>
+    <string-array name="pref_recordtime_list_values">
+        <item>15</item>
+        <item>120</item>
+        <item>180</item>
+    </string-array>
+
+    <string name="pref_title_max_videofile_count">  设置最大视频文件数</string>
+    <string-array name="pref_max_videofile_list_title">
+        <item>100</item>
+        <item>200</item>
+        <item>300</item>
+    </string-array>
+    <string-array name="pref_max_videofile_list_value">
+        <item>100</item>
+        <item>200</item>
+        <item>300</item>
+    </string-array>
+
+    <string name="time_1_min">1 分钟</string>
+    <string name="time_2_min">2 分钟</string>
+    <string name="time_3_min">3 分钟</string>
+</resources>

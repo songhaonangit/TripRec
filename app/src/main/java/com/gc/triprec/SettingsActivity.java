@@ -163,13 +163,13 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     editor.apply();
 
                     if (newValue.equals("60")) {
-                        preference.setSummary("1 min");
+                        preference.setSummary(R.string.time_1_min);
                     } else if (newValue.equals("120")) {
-                        preference.setSummary("2 min");
+                        preference.setSummary(R.string.time_2_min);
                     } else if (newValue.equals("180")) {
-                        preference.setSummary("3 min");
+                        preference.setSummary(R.string.time_3_min);
                     } else {
-                        preference.setSummary("1 min");
+                        preference.setSummary(R.string.time_1_min);
                     }
                     return true;
                 }

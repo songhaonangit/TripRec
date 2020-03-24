@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 
 import java.io.File;
@@ -22,6 +23,7 @@ public class ListVideoFragment extends ListFragment {
         startActivity(intent);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void searchFiles(Context context) {
         File appDir = new File(context.getExternalFilesDir(null), "video");

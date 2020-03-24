@@ -54,4 +54,8 @@
         <item>300</item>
     </string-array>
 
+    <string name="time_1_min">1 min</string>
+    <string name="time_2_min">2 min</string>
+    <string name="time_3_min">3 min</string>
+    
 </resources>
