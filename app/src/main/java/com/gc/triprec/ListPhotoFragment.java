@@ -17,6 +17,8 @@ public class ListPhotoFragment extends ListFragment {
 
     @Override
     public void playback(int m_position) {
+
+        Log.i(TAG, "ListPhotoFragment  playback: " + m_position);
         Intent intent = new Intent(getActivity().getApplicationContext(), PlaybackPhotoActivity.class);
         intent.putExtra("photo", m_position);
         startActivity(intent);

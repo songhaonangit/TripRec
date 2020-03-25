@@ -39,11 +39,11 @@ public class TripRecSettings {
     }
 
     public boolean getRecordEnable() {
-        return m_settings.getBoolean(Constants.SettingConstants.KEY_RECORD_ENABLE, false);
+        return m_settings.getBoolean(Constants.SettingConstants.KEY_RECORD_ENABLE, true);
     }
 
     public boolean getOverrideEnable() {
-        return m_settings.getBoolean(Constants.SettingConstants.KEY_OVERRIDE_ENABLE, false);
+        return m_settings.getBoolean(Constants.SettingConstants.KEY_OVERRIDE_ENABLE, true);
     }
 
     public int getRecordTime() {

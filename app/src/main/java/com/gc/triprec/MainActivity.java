@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
+import android.os.StatFs;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
@@ -18,9 +19,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 
+import com.gc.triprec.utils.SdCardUtil;
 import com.otaliastudios.cameraview.CameraListener;
 import com.otaliastudios.cameraview.CameraOptions;
 import com.otaliastudios.cameraview.CameraView;
+import com.otaliastudios.cameraview.VideoQuality;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -28,6 +31,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import static com.gc.triprec.utils.SdCardUtil.BLOCK_SIZE;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private CameraView m_camera;
@@ -36,7 +44,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ImageButton m_btnVideo;
     private TripRecSettings m_settings;
     private static final String TAG = "MainActivity";
-
+    ExecutorService deleteService ;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,6 +59,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.playback).setOnClickListener(this);
         m_btnVideo = findViewById(R.id.video);
         m_btnVideo.setOnClickListener(this);
+
+        deleteService =  Executors.newSingleThreadExecutor();
+
+
     }
 
     @Override
@@ -59,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         m_settings = new TripRecSettings(this);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onResume() {
         super.onResume();
@@ -90,7 +103,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        shutdownAndAwaitTermination(deleteService);
         m_camera.destroy();
+        
     }
 
     @Override
@@ -250,6 +265,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void removeOldestFile() {
+
         File appDir = new File(getExternalFilesDir(null), "video");
         if (!appDir.exists()) {
             return ;
@@ -257,14 +273,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         File[] files = appDir.listFiles();
         File old = files[0];
+
+        Log.d(TAG,"------files[0].lastModified()----"+files[0].getName()+"----"+files[0].lastModified());
+
         for (File file : files) {
-            if (old.lastModified() < file.lastModified()) {
+
+            Log.d(TAG,"------file.lastModified()----"+file.getName()+"----"+file.lastModified());
+
+            if (old.lastModified() > file.lastModified()) {
                 old = file;
                 break;
             }
         }
 
-        old.deleteOnExit();
+        Log.d(TAG,"------removeOldestFile----"+old.getName());
+
+        //old.deleteOnExit();
+      boolean result =   old.delete();
+
+        Log.d(TAG,"------removeOldestFile----"+old.getName()+"--result--"+result);
+
+    }
+
+    private  void removeOldestFileThread(){
+
+        deleteService.submit(new Runnable() {
+            @Override
+            public void run() {
+
+                removeOldestFile();
+            }
+        });
+
+
+
     }
 
     private int getFileTotalCount() {
@@ -278,15 +320,65 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return files.length;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private void takeVideo() {
         if (null == m_settings)
             return;
 
         if (m_settings.getOverrideEnable()) {
-            if (getFileTotalCount() < m_settings.getVideofilesCount()) {
-                removeOldestFile();
+            Log.d(TAG,"------m_settings.getOverrideEnable()----true");
+            //修改文件个数的判定条件，改为可用空间的大小
+           /* if (getFileTotalCount() < m_settings.getVideofilesCount()) {
+                removeOldestFileThread();
+            }*/
+
+            if(getAvailableMBytes()<500){
+                removeOldestFileThread();
+            }
+
+        }
+       // m_camera.startCapturingVideo(getVideoFilePath(), m_settings.getRecordTime() * 1000);
+        m_camera.setVideoQuality(VideoQuality.HIGHEST);
+        m_camera.setAutofillHints("2020-03-25");
+      //  m_camera.startCapturingVideo(getVideoFilePath(), 2 * 60* 1000);
+        m_camera.setVideoMaxDuration(2 * 60* 1000);
+        m_camera.startCapturingVideo(getVideoFilePath());
+    }
+
+
+    void shutdownAndAwaitTermination(ExecutorService pool) {
+
+       Log.d(TAG,"------shutdownAndAwaitTermination");
+        if(pool!=null){
+            pool.shutdown(); // Disable new tasks from being submitted
+            try {
+                // Wait a while for existing tasks to terminate
+                if (!pool.awaitTermination(100, TimeUnit.MILLISECONDS)) {
+                    pool.shutdownNow(); // Cancel currently executing tasks
+                    // Wait a while for tasks to respond to being cancelled
+                    if (!pool.awaitTermination(100, TimeUnit.MILLISECONDS))
+                        System.err.println("Pool did not terminate");
+                }
+            } catch (InterruptedException ie) {
+                // (Re-)Cancel if current thread also interrupted
+                pool.shutdownNow();
+                // Preserve interrupt status
+                Thread.currentThread().interrupt();
             }
         }
-        m_camera.startCapturingVideo(getVideoFilePath(), m_settings.getRecordTime() * 1000);
     }
+
+    public  long getAvailableMBytes() {
+
+        File appDir = new File(getExternalFilesDir(null), "");
+        StatFs statFs = new StatFs(appDir.getPath());
+        //获得sdcard上 block的总数
+        long blockCount = statFs.getAvailableBlocksLong();
+        //获得sdcard上每个block 的大小
+        long blockSize = statFs.getBlockSizeLong();
+        //计算标准大小使用：1024，当然使用1000也可以
+        return blockCount * blockSize / BLOCK_SIZE / BLOCK_SIZE;
+
+    }
+
 }
