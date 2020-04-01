@@ -19,7 +19,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 
-import com.gc.triprec.utils.SdCardUtil;
 import com.otaliastudios.cameraview.CameraListener;
 import com.otaliastudios.cameraview.CameraOptions;
 import com.otaliastudios.cameraview.CameraView;
@@ -45,6 +44,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TripRecSettings m_settings;
     private static final String TAG = "MainActivity";
     ExecutorService deleteService ;
+    long totalMBsize;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         deleteService =  Executors.newSingleThreadExecutor();
 
-
+        totalMBsize = getTotalMBytes();
     }
 
     @Override
@@ -297,6 +297,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private  void removeOldestFileThread(){
 
+
+        if(deleteService.isTerminated()){
+
+            Log.d(TAG,"------deleteService--isTerminated--true");
+
+            deleteService =  Executors.newSingleThreadExecutor();
+
+        }
+
+
         deleteService.submit(new Runnable() {
             @Override
             public void run() {
@@ -326,22 +336,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return;
 
         if (m_settings.getOverrideEnable()) {
-            Log.d(TAG,"------m_settings.getOverrideEnable()----true");
+            Log.d(TAG,"------m_settings.getOverrideEnable()----true"+"---totalMBsize---"+totalMBsize);
             //修改文件个数的判定条件，改为可用空间的大小
            /* if (getFileTotalCount() < m_settings.getVideofilesCount()) {
                 removeOldestFileThread();
             }*/
 
-            if(getAvailableMBytes()<500){
+
+
+            if(getAvailableMBytes()<totalMBsize*0.15){
                 removeOldestFileThread();
             }
 
         }
        // m_camera.startCapturingVideo(getVideoFilePath(), m_settings.getRecordTime() * 1000);
         m_camera.setVideoQuality(VideoQuality.HIGHEST);
-        m_camera.setAutofillHints("2020-03-25");
+      //  m_camera.setAutofillHints("2020-03-25");
       //  m_camera.startCapturingVideo(getVideoFilePath(), 2 * 60* 1000);
-        m_camera.setVideoMaxDuration(2 * 60* 1000);
+        m_camera.setVideoMaxDuration(5 * 60* 1000);
         m_camera.startCapturingVideo(getVideoFilePath());
     }
 
@@ -378,6 +390,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         long blockSize = statFs.getBlockSizeLong();
         //计算标准大小使用：1024，当然使用1000也可以
         return blockCount * blockSize / BLOCK_SIZE / BLOCK_SIZE;
+
+    }
+
+
+    public  long getTotalMBytes() {
+
+        File appDir = new File(getExternalFilesDir(null), "");
+        StatFs statFs = new StatFs(appDir.getPath());
+        //获得sdcard上 block的总数
+        long totalBytes = statFs.getTotalBytes();
+        //获得sdcard上每个block 的大小
+        //计算标准大小使用：1024，当然使用1000也可以
+        return totalBytes  / BLOCK_SIZE / BLOCK_SIZE;
 
     }
 
